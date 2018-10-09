@@ -1,22 +1,27 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: cpp
 cache: apt
 compiler:
   - gcc
   - clang
 env:
-  - QT_SELECT=qt4 ; CONFIG=minimal
-  - QT_SELECT=qt4 ; CONFIG=minimal-static
-  - QT_SELECT=qt4 ; CONFIG=full
-  - QT_SELECT=qt4 ; CONFIG=full-debug
-  - QT_SELECT=qt4 ; CONFIG=full-static
-  - QT_SELECT=qt5 ; CONFIG=minimal
-  - QT_SELECT=qt5 ; CONFIG=minimal-static
-  - QT_SELECT=qt5 ; CONFIG=full
-  - QT_SELECT=qt5 ; CONFIG=full-debug
-  - QT_SELECT=qt5 ; CONFIG=full-static
+  - CONFIG=minimal
+  - CONFIG=full
+  - CONFIG=full-debug
 install:
   - tests/travis/install-build-depends
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+os:
+  - linux
+  - osx
 script:
   - tests/travis/build-and-test
+after_success:
+  - |
+    if [ "$CONFIG" = "full-debug" ]; then
+      bash <(curl -s https://codecov.io/bash)
+    fi

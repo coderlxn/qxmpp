@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/qxmpp-project/qxmpp.png)](https://travis-ci.org/qxmpp-project/qxmpp)
+[![Build Status](https://img.shields.io/travis/qxmpp-project/qxmpp.svg)](https://travis-ci.org/qxmpp-project/qxmpp)
+[![Code Coverage](https://img.shields.io/codecov/c/github/qxmpp-project/qxmpp.svg)](https://codecov.io/gh/qxmpp-project/qxmpp)
 
 ABOUT QXMPP
 ===========
@@ -23,37 +24,25 @@ version 2.1 or later.
 BUILDING QXMPP
 ==============
 
-QXmpp requires Qt 4.5 or higher (including Qt 5.x) with SSL enabled and it uses
-the standard qmake build system of Qt.
+QXmpp requires Qt 5.0 or higher with SSL enabled.
+It uses CMake as build system.
 
 Build from command line:
 
-    cd <where qxmpp.pro is located>
-    qmake <arguments>
-    <respective-make-cmd = gmake, make, mingw32-make, nmake>
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build .
 
-You can pass the following arguments to qmake:
+You can pass the following arguments to CMake:
 
-    PREFIX=<prefix>               to change the install prefix
-                                  default:
-                                      unix:  /usr/local on unix
-                                      other: $$[QT_INSTALL_PREFIX]
-    QXMPP_AUTOTEST_INTERNAL=1     to enabled internal autotests
-    QXMPP_LIBRARY_TYPE=staticlib  to build a static version of QXmpp
-    QXMPP_USE_DOXYGEN=1           to build the HTML documentation
-    QXMPP_USE_OPUS=1              to enable opus audio codec
-    QXMPP_USE_SPEEX=1             to enable speex audio codec
-    QXMPP_USE_THEORA=1            to enable theora video codec
-    QXMPP_USE_VPX=1               to enable vpx video codec
-
-Note: by default QXmpp is built as a shared library. If you decide to build
-a static library instead, you will need to pass -DQXMPP_STATIC when building
-your programs against QXmpp.
-
-Build using Qt Creator:
-
-Open the qxmpp.pro file in Qt Creator and hit "Build All" to build all
-the examples and library.
+    BUILD_DOCUMENTATION           to build the documentation
+    BUILD_EXAMPLES                to build the examples
+    BUILD_TESTS                   to build the unit tests
+    WITH_OPUS                     to enable opus audio codec
+    WITH_SPEEX                    to enable speex audio codec
+    WITH_THEORA                   to enable theora video codec
+    WITH_VPX                      to enable vpx video codec
 
 INSTALLING QXMPP
 ================
@@ -63,16 +52,7 @@ and Documentation using the following command:
 
 Install from command line:
 
-    <respective-make-cmd = gmake, make, mingw32-make, nmake> install
-
-Path of installations:
-
-    Headers:            PREFIX/include/qxmpp
-    Library:            PREFIX/lib
-    API Documentation:  PREFIX/share/doc/qxmpp
-
-To link against the shared version of QXmpp, you need to add -DQXMPP_SHARED
-to your C++ flags.
+    cmake --build . --target install
 
 EXAMPLES
 ========
@@ -107,22 +87,7 @@ SUPPORTED PLATFORMS
 It should work on all the plaforms supported by Qt. For a complete list of
 platforms support by Qt, see:
 
-http://qt-project.org/doc/supported-platforms.html
-
-In past, we have tested on variety of platforms:
-
-    win32-g++        (Qt SDK)
-    win32-msvc2008   (Qt MSVC-2008)
-    win64-msvc2008   (Qt MSVC-2008)
-    symbian-gcce     (Nokia Qt SDK)
-    linux-g++        (32-bit and 64-bit)
-    macos-g++        (32-bit and 64-bit)
-
-Please note that on Symbian, you will need to make sure your add the
-"NetworkServices" to your application to enable it to access the network.
-You can do this by adding the following to your .pro file:
-
-    TARGET.CAPABILITY = "NetworkServices"
+https://doc.qt.io/qt-5/supported-platforms.html
 
 HOW TO REPORT A BUG
 ===================
@@ -138,4 +103,4 @@ DISCUSSION GROUP
 
 Join QXmpp Discussion Group for queries, discussions and updates.
 
-http://groups.google.com/group/qxmpp
+https://groups.google.com/forum/#!forum/qxmpp

@@ -1,43 +1,39 @@
 #!/bin/sh
 set -e
 
-QMAKE_ARGS=""
-
-if [ -n "$CC" ]; then
-    QMAKE_ARGS="$QMAKE_ARGS QMAKE_CC=$CC"
-fi
-
-
-if [ -n "$CXX" ]; then
-    QMAKE_ARGS="$QMAKE_ARGS QMAKE_CXX=$CXX"
-fi
-
-if [ "$CXX" = "clang++" ]; then
-    QMAKE_ARGS="$QMAKE_ARGS QMAKE_LINK=clang++"
-    QMAKE_ARGS="$QMAKE_ARGS QMAKE_LINK_SHLIB=clang++"
-fi
+CMAKE_ARGS="-DBUILD_TESTS:BOOL=True"
 
 case "$CONFIG" in
 full*)
-    QMAKE_ARGS="$QMAKE_ARGS QXMPP_USE_DOXYGEN=1 QXMPP_USE_OPUS=1 QXMPP_USE_SPEEX=1 QXMPP_USE_THEORA=1 QXMPP_USE_VPX=1"
+    CMAKE_ARGS="-DBUILD_DOCUMENTATION:BOOL=True -DBUILD_EXAMPLES:BOOL=True -DWITH_OPUS:BOOL=True -DWITH_SPEEX:BOOL=True -DWITH_THEORA:BOOL=True -DWITH_VPX:BOOL=True"
     ;;
 esac
 
 case "$CONFIG" in
 *debug*)
-    QMAKE_ARGS="$QMAKE_ARGS CONFIG+=debug"
+    CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=Debug"
     ;;
 esac
 
-case "$CONFIG" in
-*static*)
-    QMAKE_ARGS="$QMAKE_ARGS QXMPP_LIBRARY_TYPE=staticlib"
-    ;;
-esac
+if [ "$(uname -s)" = "Darwin" ]; then
+    # pick up cmake files from homebrew
+    CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_PREFIX_PATH=/usr/local/opt/qt5"
+else
+    # This hides all the paths that contain custom travis binaries like the
+    # updated version of cmake.
+    export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+fi
+
+# build with code coverage
+if [ "$CONFIG" = "full-debug" ]; then
+    export CXXFLAGS="-fprofile-arcs -ftest-coverage"
+fi
 
 # compile
-qmake $QMAKE_ARGS
-make VERBOSE=1
+mkdir build
+cd build
+cmake .. $CMAKE_ARGS
+make
 
 # run tests
-make check
+make test
