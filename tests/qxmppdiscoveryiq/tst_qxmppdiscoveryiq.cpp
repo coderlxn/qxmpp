@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Jeremy Lainé
@@ -22,9 +22,10 @@
  *
  */
 
-#include <QObject>
 #include "QXmppDiscoveryIq.h"
+
 #include "util.h"
+#include <QObject>
 
 class tst_QXmppDiscoveryIq : public QObject
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Georg Rudoy
@@ -29,7 +29,7 @@
 
 /// \brief The QXmppMessageReceiptManager class makes it possible to
 /// send and receive message delivery receipts as defined in
-/// XEP-0184: Message Delivery Receipts.
+/// \xep{0184}: Message Delivery Receipts.
 ///
 /// \ingroup Managers
 
@@ -40,15 +40,15 @@ public:
     QXmppMessageReceiptManager();
 
     /// \cond
-    virtual QStringList discoveryFeatures() const;
-    virtual bool handleStanza(const QDomElement &stanza);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement &stanza) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when receipt for the message with the
     /// given id is received. The id could be previously obtained by
     /// calling QXmppMessage::id().
     void messageDelivered(const QString &jid, const QString &id);
 };
 
-#endif // QXMPPMESSAGERECEIPTMANAGER_H
+#endif  // QXMPPMESSAGERECEIPTMANAGER_H

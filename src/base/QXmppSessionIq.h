@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef QXMPPSESSIONIQ_H
 #define QXMPPSESSIONIQ_H
 
@@ -42,8 +41,8 @@ public:
 
 private:
     /// \cond
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 };
 
-#endif // QXMPPSESSION_H
+#endif  // QXMPPSESSION_H

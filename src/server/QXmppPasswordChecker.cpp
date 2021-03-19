@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,11 +21,11 @@
  *
  */
 
+#include "QXmppPasswordChecker.h"
+
 #include <QCryptographicHash>
 #include <QString>
 #include <QTimer>
-
-#include "QXmppPasswordChecker.h"
 
 /// Returns the requested domain.
 
@@ -79,8 +79,8 @@ void QXmppPasswordRequest::setUsername(const QString &username)
 
 QXmppPasswordReply::QXmppPasswordReply(QObject *parent)
     : QObject(parent),
-    m_error(QXmppPasswordReply::NoError),
-    m_isFinished(false)
+      m_error(QXmppPasswordReply::NoError),
+      m_isFinished(false)
 {
 }
 
@@ -128,7 +128,7 @@ void QXmppPasswordReply::finish()
 
 void QXmppPasswordReply::finishLater()
 {
-    QTimer::singleShot(0, this, SLOT(finish()));
+    QTimer::singleShot(0, this, &QXmppPasswordReply::finish);
 }
 
 /// Returns true when the reply has finished.
@@ -162,7 +162,7 @@ void QXmppPasswordReply::setPassword(const QString &password)
 
 QXmppPasswordReply *QXmppPasswordChecker::checkPassword(const QXmppPasswordRequest &request)
 {
-    QXmppPasswordReply *reply = new QXmppPasswordReply;
+    auto *reply = new QXmppPasswordReply;
 
     QString secret;
     QXmppPasswordReply::Error error = getPassword(request, secret);
@@ -187,7 +187,7 @@ QXmppPasswordReply *QXmppPasswordChecker::checkPassword(const QXmppPasswordReque
 
 QXmppPasswordReply *QXmppPasswordChecker::getDigest(const QXmppPasswordRequest &request)
 {
-    QXmppPasswordReply *reply = new QXmppPasswordReply;
+    auto *reply = new QXmppPasswordReply;
 
     QString secret;
     QXmppPasswordReply::Error error = getPassword(request, secret);
@@ -225,4 +225,3 @@ bool QXmppPasswordChecker::hasGetPassword() const
 {
     return false;
 }
-

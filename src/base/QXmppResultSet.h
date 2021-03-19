@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
- *  Olivier Goffart <ogoffart@woboq.com>
+ *  Olivier Goffart
  *
  * Source:
  *  https://github.com/qxmpp-project/qxmpp
@@ -24,12 +24,12 @@
 #ifndef QXMPPRESULTSET_H
 #define QXMPPRESULTSET_H
 
-#include <QDateTime>
-
 #include "QXmppStanza.h"
 
+#include <QDateTime>
+
 /// \brief The QXmppResultSetQuery class represents a set element in a query
-/// as defined by XEP-0059: Result Set Management.
+/// as defined by \xep{0059}: Result Set Management.
 
 class QXMPP_EXPORT QXmppResultSetQuery
 {
@@ -43,10 +43,10 @@ public:
     void setIndex(int index);
 
     QString before() const;
-    void setBefore(const QString &before );
+    void setBefore(const QString &before);
 
     QString after() const;
-    void setAfter(const QString &after );
+    void setAfter(const QString &after);
 
     bool isNull() const;
 
@@ -63,7 +63,7 @@ private:
 };
 
 /// \brief The QXmppResultSetReply class represents a set element in a reply
-/// as defined by XEP-0059: Result Set Management.
+/// as defined by \xep{0059}: Result Set Management.
 
 class QXMPP_EXPORT QXmppResultSetReply
 {
@@ -71,10 +71,10 @@ public:
     QXmppResultSetReply();
 
     QString first() const;
-    void setFirst(const QString &first );
+    void setFirst(const QString &first);
 
     QString last() const;
-    void setLast(const QString &last );
+    void setLast(const QString &last);
 
     int count() const;
     void setCount(int count);
@@ -96,4 +96,4 @@ private:
     QString m_last;
 };
 
-#endif // QXMPPRESULTSET_H
+#endif  // QXMPPRESULTSET_H

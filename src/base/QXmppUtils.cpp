@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -22,6 +22,9 @@
  *
  */
 
+#include "QXmppUtils.h"
+
+#include "QXmppLogger.h"
 
 #include <QBuffer>
 #include <QByteArray>
@@ -29,18 +32,18 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDomElement>
-#include <QRegExp>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+#include <QRandomGenerator>
+#endif
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
+#include <QUuid>
 #include <QXmlStreamWriter>
-
-#include "QXmppUtils.h"
-#include "QXmppLogger.h"
 
 // adapted from public domain source by Ross Williams and Eric Durbin
 // FIXME : is this valid for big-endian machines?
-static quint32 crctable[256] =
-{
+static quint32 crctable[256] = {
     0x00000000L, 0x77073096L, 0xEE0E612CL, 0x990951BAL,
     0x076DC419L, 0x706AF48FL, 0xE963A535L, 0x9E6495A3L,
     0x0EDB8832L, 0x79DCB8A4L, 0xE0D5E91EL, 0x97D2D988L,
@@ -107,100 +110,81 @@ static quint32 crctable[256] =
     0xB40BBE37L, 0xC30C8EA1L, 0x5A05DF1BL, 0x2D02EF8DL
 };
 
+///
 /// Parses a date-time from a string according to
-/// XEP-0082: XMPP Date and Time Profiles.
-
+/// \xep{0082}: XMPP Date and Time Profiles.
+///
 QDateTime QXmppUtils::datetimeFromString(const QString &str)
 {
-    QRegExp tzRe("(Z|([+-])([0-9]{2}):([0-9]{2}))");
-    int tzPos = tzRe.indexIn(str, 19);
-    if (str.size() < 20 || tzPos < 0)
-        return QDateTime();
-
-    // process date and time
-    QDateTime dt = QDateTime::fromString(str.left(19), "yyyy-MM-ddThh:mm:ss");
-    dt.setTimeSpec(Qt::UTC);
-
-    // process milliseconds
-    if (tzPos > 20 && str.at(19) == '.')
-    {
-        QString millis = (str.mid(20, tzPos - 20) + "000").left(3);
-        dt = dt.addMSecs(millis.toInt());
-    }
-
-    // process time zone
-    if (tzRe.cap(1) != "Z")
-    {
-        int offset = tzRe.cap(3).toInt() * 3600 + tzRe.cap(4).toInt() * 60;
-        if (tzRe.cap(2) == "+")
-            dt = dt.addSecs(-offset);
-        else
-            dt = dt.addSecs(offset);
-    }
-    return dt;
+    // Qt::ISODate parses milliseconds, but doesn't output them
+    return QDateTime::fromString(str, Qt::ISODate).toUTC();
 }
 
+///
 /// Serializes a date-time to a string according to
-/// XEP-0082: XMPP Date and Time Profiles.
-
+/// \xep{0082}: XMPP Date and Time Profiles.
+///
 QString QXmppUtils::datetimeToString(const QDateTime &dt)
 {
-    QDateTime utc = dt.toUTC();
-    if (utc.time().msec())
-        return utc.toString("yyyy-MM-ddThh:mm:ss.zzzZ");
-    else
-        return utc.toString("yyyy-MM-ddThh:mm:ssZ");
+    if (dt.time().msec()) {
+        return dt.toUTC().toString(Qt::ISODateWithMs);
+    }
+    return dt.toUTC().toString(Qt::ISODate);
 }
 
+///
 /// Parses a timezone offset (in seconds) from a string according to
-/// XEP-0082: XMPP Date and Time Profiles.
-
+/// \xep{0082}: XMPP Date and Time Profiles.
+///
 int QXmppUtils::timezoneOffsetFromString(const QString &str)
 {
-    QRegExp tzRe("(Z|([+-])([0-9]{2}):([0-9]{2}))");
-    if (!tzRe.exactMatch(str))
+    static const QRegularExpression timezoneRegex(QStringLiteral("(Z|([+-])([0-9]{2}):([0-9]{2}))"));
+
+    const auto match = timezoneRegex.match(str);
+    if (!match.hasMatch())
         return 0;
 
     // No offset from UTC
-    if (tzRe.cap(1) == "Z")
+    if (match.captured(1) == QChar(u'Z'))
         return 0;
 
     // Calculate offset
-    const int offset = tzRe.cap(3).toInt() * 3600 +
-                       tzRe.cap(4).toInt() * 60;
-    if (tzRe.cap(2) == "-")
+    const int offset = match.captured(3).toInt() * 3600 +
+        match.captured(4).toInt() * 60;
+
+    if (match.captured(2) == QChar(u'-'))
         return -offset;
-    else
-        return offset;
+    return offset;
 }
 
+///
 /// Serializes a timezone offset (in seconds) to a string according to
-/// XEP-0082: XMPP Date and Time Profiles.
-
+/// \xep{0082}: XMPP Date and Time Profiles.
+///
 QString QXmppUtils::timezoneOffsetToString(int secs)
 {
     if (!secs)
-        return QString::fromLatin1("Z");
+        return QStringLiteral("Z");
 
     const QTime tzoTime = QTime(0, 0, 0).addSecs(qAbs(secs));
-    return (secs < 0 ? "-" : "+") + tzoTime.toString("hh:mm");
+    return (secs < 0 ? QStringLiteral("-") : QStringLiteral("+")) + tzoTime.toString(QStringLiteral("hh:mm"));
 }
 
 /// Returns the domain for the given \a jid.
 
 QString QXmppUtils::jidToDomain(const QString &jid)
 {
-    return jidToBareJid(jid).split("@").last();
+    return jidToBareJid(jid).split(QStringLiteral("@")).last();
 }
 
 /// Returns the resource for the given \a jid.
 
-QString QXmppUtils::jidToResource(const QString& jid)
+QString QXmppUtils::jidToResource(const QString &jid)
 {
     const int pos = jid.indexOf(QChar('/'));
     if (pos < 0)
         return QString();
-    return jid.mid(pos+1);
+    return jid.mid(pos + 1);
 }
 
 /// Returns the user for the given \a jid.
@@ -215,7 +199,7 @@ QString QXmppUtils::jidToUser(const QString &jid)
 
 /// Returns the bare jid (i.e. without resource) for the given \a jid.
 
-QString QXmppUtils::jidToBareJid(const QString& jid)
+QString QXmppUtils::jidToBareJid(const QString &jid)
 {
     const int pos = jid.indexOf(QChar('/'));
     if (pos < 0)
@@ -228,8 +212,8 @@ QString QXmppUtils::jidToBareJid(const QString& jid)
 quint32 QXmppUtils::generateCrc32(const QByteArray &in)
 {
     quint32 result = 0xffffffff;
-    for(int n = 0; n < in.size(); ++n)
-        result = (result >> 8) ^ (crctable[(result & 0xff) ^ (quint8)in[n]]);
+    for (char n : in)
+        result = (result >> 8) ^ (crctable[(result & 0xff) ^ (quint8)n]);
     return result ^= 0xffffffff;
 }
 
@@ -278,7 +262,13 @@ int QXmppUtils::generateRandomInteger(int N)
 {
     Q_ASSERT(N > 0 && N <= RAND_MAX);
     int val;
-    while (N <= (val = qrand() / (RAND_MAX/N))) {};
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    while (N <= (val = QRandomGenerator::global()->generate() / (RAND_MAX / N))) {
+    }
+#else
+    while (N <= (val = qrand() / (RAND_MAX / N))) {
+    }
+#endif
     return val;
 }
 
@@ -294,33 +284,60 @@ QByteArray QXmppUtils::generateRandomBytes(int length)
     return bytes;
 }
 
+///
+/// Creates a new stanza id in the UUID format.
+///
+/// \since QXmpp 1.3
+///
+QString QXmppUtils::generateStanzaUuid()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
+#else
+    return QUuid::createUuid().toString().mid(1, 36);
+#endif
+}
+
+///
 /// Returns a random alphanumerical string of the specified size.
 ///
+/// Since QXmpp 1.3 this will generate a UUID, if the specified \p length is 36
+/// which is also the new default value. The returned string is still 36
+/// characters long, but will contain dashes (as specified in the UUID format).
+///
+/// \note It is recommended to use UUIDs for cases where IDs must be unique and
+/// are possibly stored permanently. This can be done using
+/// QXmppUtils::generateStanzaUuid(). However, since that function is only
+/// available since QXmpp 1.3, you may also want to continue to use this
+/// function because of compatibility reasons.
+///
 /// \param length
-
+///
 QString QXmppUtils::generateStanzaHash(int length)
 {
-    const QString somechars = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (length == 36)
+        return QXmppUtils::generateStanzaUuid();
+
+    const QString somechars = QStringLiteral("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
     const int N = somechars.size();
     QString hashResult;
-    for ( int idx = 0; idx < length; ++idx )
+    for (int idx = 0; idx < length; ++idx)
         hashResult += somechars[generateRandomInteger(N)];
     return hashResult;
 }
 
-void helperToXmlAddAttribute(QXmlStreamWriter* stream, const QString& name,
-                             const QString& value)
+void helperToXmlAddAttribute(QXmlStreamWriter *stream, const QString &name,
+                             const QString &value)
 {
-    if(!value.isEmpty())
-        stream->writeAttribute(name,value);
+    if (!value.isEmpty())
+        stream->writeAttribute(name, value);
 }
 
-void helperToXmlAddTextElement(QXmlStreamWriter* stream, const QString& name,
-                           const QString& value)
+void helperToXmlAddTextElement(QXmlStreamWriter *stream, const QString &name,
+                               const QString &value)
 {
-    if(!value.isEmpty())
-        stream->writeTextElement( name, value);
+    if (!value.isEmpty())
+        stream->writeTextElement(name, value);
     else
         stream->writeEmptyElement(name);
 }
-

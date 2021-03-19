@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,15 +21,16 @@
  *
  */
 
-#include <QDomElement>
+#include "QXmppMucIq.h"
 
 #include "QXmppConstants_p.h"
-#include "QXmppMucIq.h"
 #include "QXmppUtils.h"
+
+#include <QDomElement>
 
 QXmppMucItem::QXmppMucItem()
     : m_affiliation(QXmppMucItem::UnspecifiedAffiliation),
-    m_role(QXmppMucItem::UnspecifiedRole)
+      m_role(QXmppMucItem::UnspecifiedRole)
 {
 }
 
@@ -38,11 +39,11 @@ QXmppMucItem::QXmppMucItem()
 bool QXmppMucItem::isNull() const
 {
     return m_actor.isEmpty() &&
-           m_affiliation == UnspecifiedAffiliation &&
-           m_jid.isEmpty() &&
-           m_nick.isEmpty() &&
-           m_reason.isEmpty() &&
-           m_role == UnspecifiedRole;
+        m_affiliation == UnspecifiedAffiliation &&
+        m_jid.isEmpty() &&
+        m_nick.isEmpty() &&
+        m_reason.isEmpty() &&
+        m_role == UnspecifiedRole;
 }
 
 /// Returns the actor for this item, for instance the admin who kicked
@@ -71,15 +72,15 @@ QXmppMucItem::Affiliation QXmppMucItem::affiliation() const
 /// \cond
 QXmppMucItem::Affiliation QXmppMucItem::affiliationFromString(const QString &affiliationStr)
 {
-    if (affiliationStr == "owner")
+    if (affiliationStr == QStringLiteral("owner"))
         return QXmppMucItem::OwnerAffiliation;
-    else if (affiliationStr == "admin")
+    else if (affiliationStr == QStringLiteral("admin"))
         return QXmppMucItem::AdminAffiliation;
-    else if (affiliationStr == "member")
+    else if (affiliationStr == QStringLiteral("member"))
         return QXmppMucItem::MemberAffiliation;
-    else if (affiliationStr == "outcast")
+    else if (affiliationStr == QStringLiteral("outcast"))
         return QXmppMucItem::OutcastAffiliation;
-    else if (affiliationStr == "none")
+    else if (affiliationStr == QStringLiteral("none"))
         return QXmppMucItem::NoAffiliation;
     else
         return QXmppMucItem::UnspecifiedAffiliation;
@@ -171,13 +172,13 @@ QXmppMucItem::Role QXmppMucItem::role() const
 /// \cond
 QXmppMucItem::Role QXmppMucItem::roleFromString(const QString &roleStr)
 {
-    if (roleStr == "moderator")
+    if (roleStr == QStringLiteral("moderator"))
         return QXmppMucItem::ModeratorRole;
-    else if (roleStr == "participant")
+    else if (roleStr == QStringLiteral("participant"))
         return QXmppMucItem::ParticipantRole;
-    else if (roleStr == "visitor")
+    else if (roleStr == QStringLiteral("visitor"))
         return QXmppMucItem::VisitorRole;
-    else if (roleStr == "none")
+    else if (roleStr == QStringLiteral("none"))
         return QXmppMucItem::NoRole;
     else
         return QXmppMucItem::UnspecifiedRole;
@@ -187,13 +188,13 @@ QString QXmppMucItem::roleToString(Role role)
 {
     switch (role) {
     case QXmppMucItem::ModeratorRole:
-        return "moderator";
+        return QStringLiteral("moderator");
     case QXmppMucItem::ParticipantRole:
-        return "participant";
+        return QStringLiteral("participant");
     case QXmppMucItem::VisitorRole:
-        return "visitor";
+        return QStringLiteral("visitor");
     case QXmppMucItem::NoRole:
-        return "none";
+        return QStringLiteral("none");
     default:
         return QString();
     }
@@ -212,28 +213,28 @@ void QXmppMucItem::setRole(Role role)
 /// \cond
 void QXmppMucItem::parse(const QDomElement &element)
 {
-    m_affiliation = QXmppMucItem::affiliationFromString(element.attribute("affiliation").toLower());
-    m_jid = element.attribute("jid");
-    m_nick = element.attribute("nick");
-    m_role = QXmppMucItem::roleFromString(element.attribute("role").toLower());
-    m_actor = element.firstChildElement("actor").attribute("jid");
-    m_reason = element.firstChildElement("reason").text();
+    m_affiliation = QXmppMucItem::affiliationFromString(element.attribute(QStringLiteral("affiliation")).toLower());
+    m_jid = element.attribute(QStringLiteral("jid"));
+    m_nick = element.attribute(QStringLiteral("nick"));
+    m_role = QXmppMucItem::roleFromString(element.attribute(QStringLiteral("role")).toLower());
+    m_actor = element.firstChildElement(QStringLiteral("actor")).attribute("jid");
+    m_reason = element.firstChildElement(QStringLiteral("reason")).text();
 }
 
 void QXmppMucItem::toXml(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("item");
-    helperToXmlAddAttribute(writer, "affiliation", affiliationToString(m_affiliation));
-    helperToXmlAddAttribute(writer, "jid", m_jid);
-    helperToXmlAddAttribute(writer, "nick", m_nick);
-    helperToXmlAddAttribute(writer, "role", roleToString(m_role));
+    writer->writeStartElement(QStringLiteral("item"));
+    helperToXmlAddAttribute(writer, QStringLiteral("affiliation"), affiliationToString(m_affiliation));
+    helperToXmlAddAttribute(writer, QStringLiteral("jid"), m_jid);
+    helperToXmlAddAttribute(writer, QStringLiteral("nick"), m_nick);
+    helperToXmlAddAttribute(writer, QStringLiteral("role"), roleToString(m_role));
     if (!m_actor.isEmpty()) {
-        writer->writeStartElement("actor");
-        helperToXmlAddAttribute(writer, "jid", m_actor);
+        writer->writeStartElement(QStringLiteral("actor"));
+        helperToXmlAddAttribute(writer, QStringLiteral("jid"), m_actor);
         writer->writeEndElement();
     }
     if (!m_reason.isEmpty())
-        helperToXmlAddTextElement(writer, "reason", m_reason);
+        helperToXmlAddTextElement(writer, QStringLiteral("reason"), m_reason);
     writer->writeEndElement();
 }
 /// \endcond
@@ -257,28 +258,27 @@ void QXmppMucAdminIq::setItems(const QList<QXmppMucItem> &items)
 /// \cond
 bool QXmppMucAdminIq::isMucAdminIq(const QDomElement &element)
 {
-    QDomElement queryElement = element.firstChildElement("query");
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("query"));
     return (queryElement.namespaceURI() == ns_muc_admin);
 }
 
 void QXmppMucAdminIq::parseElementFromChild(const QDomElement &element)
 {
-    QDomElement queryElement = element.firstChildElement("query");
-    QDomElement child = queryElement.firstChildElement("item");
-    while (!child.isNull())
-    {
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("query"));
+    QDomElement child = queryElement.firstChildElement(QStringLiteral("item"));
+    while (!child.isNull()) {
         QXmppMucItem item;
         item.parse(child);
         m_items << item;
-        child = child.nextSiblingElement("item");
+        child = child.nextSiblingElement(QStringLiteral("item"));
     }
 }
 
 void QXmppMucAdminIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("query");
-    writer->writeAttribute("xmlns", ns_muc_admin);
-    foreach (const QXmppMucItem &item, m_items)
+    writer->writeStartElement(QStringLiteral("query"));
+    writer->writeDefaultNamespace(ns_muc_admin);
+    for (const QXmppMucItem &item : m_items)
         item.toXml(writer);
     writer->writeEndElement();
 }
@@ -303,20 +303,20 @@ void QXmppMucOwnerIq::setForm(const QXmppDataForm &form)
 /// \cond
 bool QXmppMucOwnerIq::isMucOwnerIq(const QDomElement &element)
 {
-    QDomElement queryElement = element.firstChildElement("query");
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("query"));
     return (queryElement.namespaceURI() == ns_muc_owner);
 }
 
 void QXmppMucOwnerIq::parseElementFromChild(const QDomElement &element)
 {
-    QDomElement queryElement = element.firstChildElement("query");
-    m_form.parse(queryElement.firstChildElement("x"));
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("query"));
+    m_form.parse(queryElement.firstChildElement(QStringLiteral("x")));
 }
 
 void QXmppMucOwnerIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("query");
-    writer->writeAttribute("xmlns", ns_muc_owner);
+    writer->writeStartElement(QStringLiteral("query"));
+    writer->writeDefaultNamespace(ns_muc_owner);
     m_form.toXml(writer);
     writer->writeEndElement();
 }

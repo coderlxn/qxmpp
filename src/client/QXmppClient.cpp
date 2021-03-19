@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,61 +21,36 @@
  *
  */
 
+#include "QXmppClient.h"
+
+#include "QXmppClientExtension.h"
+#include "QXmppClient_p.h"
+#include "QXmppConstants_p.h"
+#include "QXmppDiscoveryIq.h"
+#include "QXmppDiscoveryManager.h"
+#include "QXmppEntityTimeManager.h"
+#include "QXmppLogger.h"
+#include "QXmppMessage.h"
+#include "QXmppOutgoingClient.h"
+#include "QXmppRosterManager.h"
+#include "QXmppTlsManager_p.h"
+#include "QXmppUtils.h"
+#include "QXmppVCardManager.h"
+#include "QXmppVersionManager.h"
+
 #include <QSslSocket>
 #include <QTimer>
 
-#include "QXmppClient.h"
-#include "QXmppClientExtension.h"
-#include "QXmppConstants_p.h"
-#include "QXmppLogger.h"
-#include "QXmppOutgoingClient.h"
-#include "QXmppMessage.h"
-#include "QXmppUtils.h"
-
-#include "QXmppRosterManager.h"
-#include "QXmppVCardManager.h"
-#include "QXmppVersionManager.h"
-#include "QXmppEntityTimeManager.h"
-#include "QXmppDiscoveryManager.h"
-#include "QXmppDiscoveryIq.h"
-
-class QXmppClientPrivate
-{
-public:
-    QXmppClientPrivate(QXmppClient *qq);
-
-    QXmppPresence clientPresence;                   ///< Current presence of the client
-    QList<QXmppClientExtension*> extensions;
-    QXmppLogger *logger;
-    QXmppOutgoingClient *stream;                    ///< Pointer to the XMPP stream
-
-    // reconnection
-    bool receivedConflict;
-    int reconnectionTries;
-    QTimer *reconnectionTimer;
-
-    void addProperCapability(QXmppPresence& presence);
-    int getNextReconnectTime() const;
-
-private:
-    QXmppClient *q;
-};
-
-QXmppClientPrivate::QXmppClientPrivate(QXmppClient *qq)
-    : clientPresence(QXmppPresence::Available)
-    , logger(0)
-    , stream(0)
-    , receivedConflict(false)
-    , reconnectionTries(0)
-    , reconnectionTimer(0)
-    , q(qq)
+/// \cond
+QXmppClientPrivate::QXmppClientPrivate(QXmppClient* qq)
+    : clientPresence(QXmppPresence::Available), logger(nullptr), stream(nullptr), receivedConflict(false), reconnectionTries(0), reconnectionTimer(nullptr), isActive(true), q(qq)
 {
 }
 
 void QXmppClientPrivate::addProperCapability(QXmppPresence& presence)
 {
-    QXmppDiscoveryManager* ext = q->findExtension<QXmppDiscoveryManager>();
-    if(ext) {
+    auto* ext = q->findExtension<QXmppDiscoveryManager>();
+    if (ext) {
         presence.setCapabilityHash("sha-1");
         presence.setCapabilityNode(ext->clientCapabilitiesNode());
         presence.setCapabilityVer(ext->capabilities().verificationString());
@@ -94,66 +69,94 @@ int QXmppClientPrivate::getNextReconnectTime() const
         return 60 * 1000;
 }
 
+QStringList QXmppClientPrivate::discoveryFeatures()
+{
+    return {
+        // XEP-0004: Data Forms
+        ns_data,
+        // XEP-0059: Result Set Management
+        ns_rsm,
+        // XEP-0066: Out of Band Data
+        ns_oob,
+        // XEP-0071: XHTML-IM
+        ns_xhtml_im,
+        // XEP-0085: Chat State Notifications
+        ns_chat_states,
+        // XEP-0115: Entity Capabilities
+        ns_capabilities,
+        // XEP-0199: XMPP Ping
+        ns_ping,
+        // XEP-0249: Direct MUC Invitations
+        ns_conference,
+        // XEP-0308: Last Message Correction
+        ns_message_correct,
+        // XEP-0333: Chat Markers
+        ns_chat_markers,
+        // XEP-0334: Message Processing Hints
+        ns_message_processing_hints,
+        // XEP-0359: Unique and Stable Stanza IDs
+        ns_sid,
+        // XEP-0367: Message Attaching
+        ns_message_attaching,
+        // XEP-0380: Explicit Message Encryption
+        ns_eme,
+        // XEP-0382: Spoiler messages
+        ns_spoiler,
+        // XEP-0428: Fallback Indication
+        ns_fallback_indication,
+    };
+}
+/// \endcond
+
 /// Creates a QXmppClient object.
 /// \param parent is passed to the QObject's constructor.
 /// The default value is 0.
 
-QXmppClient::QXmppClient(QObject *parent)
+QXmppClient::QXmppClient(QObject* parent)
     : QXmppLoggable(parent),
-    d(new QXmppClientPrivate(this))
+      d(new QXmppClientPrivate(this))
 {
-    bool check;
-    Q_UNUSED(check);
 
     d->stream = new QXmppOutgoingClient(this);
     d->addProperCapability(d->clientPresence);
 
-    check = connect(d->stream, SIGNAL(elementReceived(QDomElement,bool&)),
-                    this, SLOT(_q_elementReceived(QDomElement,bool&)));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppOutgoingClient::elementReceived,
+            this, &QXmppClient::_q_elementReceived);
 
-    check = connect(d->stream, SIGNAL(messageReceived(QXmppMessage)),
-                    this, SIGNAL(messageReceived(QXmppMessage)));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppOutgoingClient::messageReceived,
+            this, &QXmppClient::messageReceived);
 
-    check = connect(d->stream, SIGNAL(presenceReceived(QXmppPresence)),
-                    this, SIGNAL(presenceReceived(QXmppPresence)));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppOutgoingClient::presenceReceived,
+            this, &QXmppClient::presenceReceived);
 
-    check = connect(d->stream, SIGNAL(iqReceived(QXmppIq)),
-                    this, SIGNAL(iqReceived(QXmppIq)));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppOutgoingClient::iqReceived,
+            this, &QXmppClient::iqReceived);
 
-    check = connect(d->stream, SIGNAL(sslErrors(QList<QSslError>)),
-                    this, SIGNAL(sslErrors(QList<QSslError>)));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppOutgoingClient::sslErrors,
+            this, &QXmppClient::sslErrors);
 
-    check = connect(d->stream->socket(), SIGNAL(stateChanged(QAbstractSocket::SocketState)),
-                    this, SLOT(_q_socketStateChanged(QAbstractSocket::SocketState)));
-    Q_ASSERT(check);
+    connect(d->stream->socket(), &QAbstractSocket::stateChanged,
+            this, &QXmppClient::_q_socketStateChanged);
 
-    check = connect(d->stream, SIGNAL(connected()),
-                    this, SLOT(_q_streamConnected()));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppStream::connected,
+            this, &QXmppClient::_q_streamConnected);
 
-    check = connect(d->stream, SIGNAL(disconnected()),
-                    this, SLOT(_q_streamDisconnected()));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppStream::disconnected,
+            this, &QXmppClient::_q_streamDisconnected);
 
-    check = connect(d->stream, SIGNAL(error(QXmppClient::Error)),
-                    this, SLOT(_q_streamError(QXmppClient::Error)));
-    Q_ASSERT(check);
+    connect(d->stream, &QXmppOutgoingClient::error,
+            this, &QXmppClient::_q_streamError);
 
     // reconnection
     d->reconnectionTimer = new QTimer(this);
     d->reconnectionTimer->setSingleShot(true);
-    connect(d->reconnectionTimer, SIGNAL(timeout()),
-            this, SLOT(_q_reconnect()));
-    Q_ASSERT(check);
+    connect(d->reconnectionTimer, &QTimer::timeout,
+            this, &QXmppClient::_q_reconnect);
 
     // logging
     setLogger(QXmppLogger::getLogger());
 
+    addExtension(new QXmppTlsManager);
     addExtension(new QXmppRosterManager(this));
     addExtension(new QXmppVCardManager);
     addExtension(new QXmppVersionManager);
@@ -183,10 +186,9 @@ bool QXmppClient::addExtension(QXmppClientExtension* extension)
 /// \param index
 /// \param extension
 
-bool QXmppClient::insertExtension(int index, QXmppClientExtension *extension)
+bool QXmppClient::insertExtension(int index, QXmppClientExtension* extension)
 {
-    if (d->extensions.contains(extension))
-    {
+    if (d->extensions.contains(extension)) {
         qWarning("Cannot add extension, it has already been added");
         return false;
     }
@@ -204,8 +206,7 @@ bool QXmppClient::insertExtension(int index, QXmppClientExtension *extension)
 
 bool QXmppClient::removeExtension(QXmppClientExtension* extension)
 {
-    if (d->extensions.contains(extension))
-    {
+    if (d->extensions.contains(extension)) {
         d->extensions.removeAll(extension);
         delete extension;
         return true;
@@ -231,17 +232,23 @@ QXmppConfiguration& QXmppClient::configuration()
     return d->stream->configuration();
 }
 
+///
 /// Attempts to connect to the XMPP server. Server details and other configurations
 /// are specified using the config parameter. Use signals connected(), error(QXmppClient::Error)
 /// and disconnected() to know the status of the connection.
+///
 /// \param config Specifies the configuration object for connecting the XMPP server.
 /// This contains the host name, user, password etc. See QXmppConfiguration for details.
 /// \param initialPresence The initial presence which will be set for this user
 /// after establishing the session. The default value is QXmppPresence::Available
-
+///
 void QXmppClient::connectToServer(const QXmppConfiguration& config,
                                   const QXmppPresence& initialPresence)
 {
+    // reset package cache from last connection
+    if (d->stream->configuration().jidBare() != config.jidBare())
+        d->stream->resetPacketCache();
+
     d->stream->configuration() = config;
     d->clientPresence = initialPresence;
     d->addProperCapability(d->clientPresence);
@@ -254,7 +261,7 @@ void QXmppClient::connectToServer(const QXmppConfiguration& config,
 /// \param jid JID for the account.
 /// \param password Password for the account.
 
-void QXmppClient::connectToServer(const QString &jid, const QString &password)
+void QXmppClient::connectToServer(const QString& jid, const QString& password)
 {
     QXmppConfiguration config;
     config.setJid(jid);
@@ -320,10 +327,60 @@ bool QXmppClient::isConnected() const
     return d->stream->isConnected();
 }
 
+///
+/// Returns true if the current client state is "active", false if it is
+/// "inactive". See \xep{0352}: Client State Indication for details.
+///
+/// On connect this is always reset to true.
+///
+/// \since QXmpp 1.0
+///
+bool QXmppClient::isActive() const
+{
+    return d->isActive;
+}
+
+///
+/// Sets the client state as described in \xep{0352}: Client State Indication.
+///
+/// On connect this is always reset to true.
+///
+/// \since QXmpp 1.0
+///
+void QXmppClient::setActive(bool active)
+{
+    if (active != d->isActive && isConnected() && d->stream->isClientStateIndicationEnabled()) {
+        d->isActive = active;
+        QString packet = "<%1 xmlns='%2'/>";
+        d->stream->sendData(packet.arg(active ? "active" : "inactive", ns_csi).toUtf8());
+    }
+}
+
+///
+/// Returns the current \xep{0198}: Stream Management state of the connection.
+///
+/// Upon connection of the client this can be used to check whether the
+/// previous stream has been resumed.
+///
+/// \since QXmpp 1.4
+///
+QXmppClient::StreamManagementState QXmppClient::streamManagementState() const
+{
+    if (d->stream->isStreamManagementEnabled()) {
+        if (d->stream->isStreamResumed())
+            return ResumedStream;
+        return NewStream;
+    }
+    return NoStreamManagement;
+}
+
 /// Returns the reference to QXmppRosterManager object of the client.
+///
 /// \return Reference to the roster object of the connected client. Use this to
 /// get the list of friends in the roster and their presence information.
 ///
+/// \deprecated This method is deprecated since QXmpp 1.1. Use
+/// \c QXmppClient::findExtension<QXmppRosterManager>() instead.
 
 QXmppRosterManager& QXmppClient::rosterManager()
 {
@@ -335,26 +392,32 @@ QXmppRosterManager& QXmppClient::rosterManager()
 /// is offline or not present in the roster, it will still send a message to
 /// the bareJid.
 ///
+/// \note Usage of this method is discouraged because most modern clients use
+/// carbon messages (\xep{0280}: Message Carbons) and MAM (\xep{0313}: Message
+/// Archive Management) and so could possibly receive messages multiple times
+/// or not receive them at all.
+/// \c QXmppClient::sendPacket() should be used instead with a \c QXmppMessage.
+///
 /// \param bareJid bareJid of the receiving entity
 /// \param message Message string to be sent.
 
 void QXmppClient::sendMessage(const QString& bareJid, const QString& message)
 {
-    QStringList resources = rosterManager().getResources(bareJid);
-    if(!resources.isEmpty())
-    {
-        for(int i = 0; i < resources.size(); ++i)
-        {
-            sendPacket(QXmppMessage("", bareJid + "/" + resources.at(i), message));
+    QXmppRosterManager* rosterManager = findExtension<QXmppRosterManager>();
+
+    const QStringList resources = rosterManager
+        ? rosterManager->getResources(bareJid)
+        : QStringList();
+
+    if (!resources.isEmpty()) {
+        for (const auto& resource : resources) {
+            sendPacket(
+                QXmppMessage({}, bareJid + QStringLiteral("/") + resource, message));
         }
-    }
-    else
-    {
-        sendPacket(QXmppMessage("", bareJid, message));
+    } else {
+        sendPacket(QXmppMessage({}, bareJid, message));
     }
 }
-
-/// Returns the client's current state.
 
 QXmppClient::State QXmppClient::state() const
 {
@@ -393,8 +456,7 @@ void QXmppClient::setClientPresence(const QXmppPresence& presence)
     d->clientPresence = presence;
     d->addProperCapability(d->clientPresence);
 
-    if (presence.type() == QXmppPresence::Unavailable)
-    {
+    if (presence.type() == QXmppPresence::Unavailable) {
         // cancel reconnection
         d->reconnectionTimer->stop();
 
@@ -404,8 +466,7 @@ void QXmppClient::setClientPresence(const QXmppPresence& presence)
             sendPacket(d->clientPresence);
 
         d->stream->disconnectFromHost();
-    }
-    else if (d->stream->isConnected())
+    } else if (d->stream->isConnected())
         sendPacket(d->clientPresence);
     else
         connectToServer(d->stream->configuration(), presence);
@@ -420,7 +481,6 @@ QAbstractSocket::SocketError QXmppClient::socketError()
 }
 
 /// Returns the human-readable description of the last socket error if error() is QXmppClient::SocketError.
-///
 
 QString QXmppClient::socketErrorString() const
 {
@@ -428,26 +488,31 @@ QString QXmppClient::socketErrorString() const
 }
 
 /// Returns the XMPP stream error if QXmppClient::Error is QXmppClient::XmppStreamError.
-///
 
 QXmppStanza::Error::Condition QXmppClient::xmppStreamError()
 {
     return d->stream->xmppStreamError();
 }
 
-/// Returns the reference to QXmppVCardManager, implementation of XEP-0054.
+///
+/// Returns the reference to QXmppVCardManager, implementation of \xep{0054}.
 /// http://xmpp.org/extensions/xep-0054.html
 ///
-
+/// \deprecated This method is deprecated since QXmpp 1.1. Use
+/// \c QXmppClient::findExtension<QXmppVCardManager>() instead.
+///
 QXmppVCardManager& QXmppClient::vCardManager()
 {
     return *findExtension<QXmppVCardManager>();
 }
 
-/// Returns the reference to QXmppVersionManager, implementation of XEP-0092.
+///
+/// Returns the reference to QXmppVersionManager, implementation of \xep{0092}.
 /// http://xmpp.org/extensions/xep-0092.html
 ///
-
+/// \deprecated This method is deprecated since QXmpp 1.1. Use
+/// \c QXmppClient::findExtension<QXmppVersionManager>() instead.
+///
 QXmppVersionManager& QXmppClient::versionManager()
 {
     return *findExtension<QXmppVersionManager>();
@@ -458,12 +523,10 @@ QXmppVersionManager& QXmppClient::versionManager()
 /// \param element
 /// \param handled
 
-void QXmppClient::_q_elementReceived(const QDomElement &element, bool &handled)
+void QXmppClient::_q_elementReceived(const QDomElement& element, bool& handled)
 {
-    foreach (QXmppClientExtension *extension, d->extensions)
-    {
-        if (extension->handleStanza(element))
-        {
+    for (auto* extension : d->extensions) {
+        if (extension->handleStanza(element)) {
             handled = true;
             return;
         }
@@ -490,6 +553,7 @@ void QXmppClient::_q_streamConnected()
 {
     d->receivedConflict = false;
     d->reconnectionTries = 0;
+    d->isActive = true;
 
     // notify managers
     emit connected();
@@ -527,38 +591,35 @@ void QXmppClient::_q_streamError(QXmppClient::Error err)
     emit error(err);
 }
 
-/// Returns the QXmppLogger associated with the current QXmppClient.
-
-QXmppLogger *QXmppClient::logger() const
+QXmppLogger* QXmppClient::logger() const
 {
     return d->logger;
 }
 
 /// Sets the QXmppLogger associated with the current QXmppClient.
 
-void QXmppClient::setLogger(QXmppLogger *logger)
+void QXmppClient::setLogger(QXmppLogger* logger)
 {
     if (logger != d->logger) {
         if (d->logger) {
-            disconnect(this, SIGNAL(logMessage(QXmppLogger::MessageType,QString)),
-                       d->logger, SLOT(log(QXmppLogger::MessageType,QString)));
-            disconnect(this, SIGNAL(setGauge(QString,double)),
-                       d->logger, SLOT(setGauge(QString,double)));
-            disconnect(this, SIGNAL(updateCounter(QString,qint64)),
-                       d->logger, SLOT(updateCounter(QString,qint64)));
+            disconnect(this, &QXmppLoggable::logMessage,
+                       d->logger, &QXmppLogger::log);
+            disconnect(this, &QXmppLoggable::setGauge,
+                       d->logger, &QXmppLogger::setGauge);
+            disconnect(this, &QXmppLoggable::updateCounter,
+                       d->logger, &QXmppLogger::updateCounter);
         }
 
         d->logger = logger;
         if (d->logger) {
-            connect(this, SIGNAL(logMessage(QXmppLogger::MessageType,QString)),
-                    d->logger, SLOT(log(QXmppLogger::MessageType,QString)));
-            connect(this, SIGNAL(setGauge(QString,double)),
-                    d->logger, SLOT(setGauge(QString,double)));
-            connect(this, SIGNAL(updateCounter(QString,qint64)),
-                    d->logger, SLOT(updateCounter(QString,qint64)));
+            connect(this, &QXmppLoggable::logMessage,
+                    d->logger, &QXmppLogger::log);
+            connect(this, &QXmppLoggable::setGauge,
+                    d->logger, &QXmppLogger::setGauge);
+            connect(this, &QXmppLoggable::updateCounter,
+                    d->logger, &QXmppLogger::updateCounter);
         }
 
         emit loggerChanged(d->logger);
     }
 }
-

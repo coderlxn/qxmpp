@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -55,14 +55,14 @@ public:
     QXmppStunMessage request() const;
     QXmppStunMessage response() const;
 
-signals:
+Q_SIGNALS:
     void finished();
     void writeStun(const QXmppStunMessage &request);
 
-public slots:
+public Q_SLOTS:
     void readStun(const QXmppStunMessage &response);
 
-private slots:
+private Q_SLOTS:
     void retry();
 
 private:
@@ -77,16 +77,16 @@ class QXMPP_EXPORT QXmppIceTransport : public QXmppLoggable
     Q_OBJECT
 
 public:
-    QXmppIceTransport(QObject *parent = 0);
-    ~QXmppIceTransport();
+    QXmppIceTransport(QObject *parent = nullptr);
+    ~QXmppIceTransport() override;
 
     virtual QXmppJingleCandidate localCandidate(int component) const = 0;
     virtual qint64 writeDatagram(const QByteArray &data, const QHostAddress &host, quint16 port) = 0;
 
-public slots:
+public Q_SLOTS:
     virtual void disconnectFromHost() = 0;
 
-signals:
+Q_SIGNALS:
     /// \brief This signal is emitted when a data packet is received.
     void datagramReceived(const QByteArray &data, const QHostAddress &host, quint16 port);
 };
@@ -102,16 +102,15 @@ class QXMPP_EXPORT QXmppTurnAllocation : public QXmppIceTransport
     Q_OBJECT
 
 public:
-    enum AllocationState
-    {
+    enum AllocationState {
         UnconnectedState,
         ConnectingState,
         ConnectedState,
         ClosingState
     };
 
-    QXmppTurnAllocation(QObject *parent = 0);
-    ~QXmppTurnAllocation();
+    QXmppTurnAllocation(QObject *parent = nullptr);
+    ~QXmppTurnAllocation() override;
 
     QHostAddress relayedHost() const;
     quint16 relayedPort() const;
@@ -121,21 +120,21 @@ public:
     void setUser(const QString &user);
     void setPassword(const QString &password);
 
-    QXmppJingleCandidate localCandidate(int component) const;
-    qint64 writeDatagram(const QByteArray &data, const QHostAddress &host, quint16 port);
+    QXmppJingleCandidate localCandidate(int component) const override;
+    qint64 writeDatagram(const QByteArray &data, const QHostAddress &host, quint16 port) override;
 
-signals:
+Q_SIGNALS:
     /// \brief This signal is emitted once TURN allocation succeeds.
     void connected();
 
     /// \brief This signal is emitted when TURN allocation fails.
     void disconnected();
 
-public slots:
+public Q_SLOTS:
     void connectToHost();
-    void disconnectFromHost();
+    void disconnectFromHost() override;
 
-private slots:
+private Q_SLOTS:
     void readyRead();
     void refresh();
     void refreshChannels();
@@ -167,7 +166,7 @@ private:
     QString m_realm;
     QByteArray m_nonce;
     AllocationState m_state;
-    QList<QXmppStunTransaction*> m_transactions;
+    QList<QXmppStunTransaction *> m_transactions;
 };
 
 /// \internal
@@ -180,16 +179,16 @@ class QXMPP_EXPORT QXmppUdpTransport : public QXmppIceTransport
     Q_OBJECT
 
 public:
-    QXmppUdpTransport(QUdpSocket *socket, QObject *parent = 0);
-    ~QXmppUdpTransport();
+    QXmppUdpTransport(QUdpSocket *socket, QObject *parent = nullptr);
+    ~QXmppUdpTransport() override;
 
-    QXmppJingleCandidate localCandidate(int component) const;
-    qint64 writeDatagram(const QByteArray &data, const QHostAddress &host, quint16 port);
+    QXmppJingleCandidate localCandidate(int component) const override;
+    qint64 writeDatagram(const QByteArray &data, const QHostAddress &host, quint16 port) override;
 
-public slots:
-    void disconnectFromHost();
+public Q_SLOTS:
+    void disconnectFromHost() override;
 
-private slots:
+private Q_SLOTS:
     void readyRead();
 
 private:

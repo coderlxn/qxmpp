@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Jeremy Lainé
@@ -21,11 +21,11 @@
  *
  */
 
-#include <QtCore/QCoreApplication>
-
 #include "QXmppLogger.h"
 #include "QXmppPasswordChecker.h"
 #include "QXmppServer.h"
+
+#include <QtCore/QCoreApplication>
 
 #define USERNAME "qxmpp.test1"
 #define PASSWORD "qxmpp123"
@@ -33,10 +33,9 @@
 class passwordChecker : public QXmppPasswordChecker
 {
     /// Retrieves the password for the given username.
-    QXmppPasswordReply::Error getPassword(const QXmppPasswordRequest &request, QString &password)
+    QXmppPasswordReply::Error getPassword(const QXmppPasswordRequest &request, QString &password) override
     {
-        if (request.username() == USERNAME)
-        {
+        if (request.username() == USERNAME) {
             password = PASSWORD;
             return QXmppPasswordReply::NoError;
         } else {
@@ -45,7 +44,7 @@ class passwordChecker : public QXmppPasswordChecker
     };
 
     /// Returns true as we implemented getPassword().
-    bool hasGetPassword() const
+    bool hasGetPassword() const override
     {
         return true;
     };
@@ -56,8 +55,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     // we want one argument : the domain to serve
-    if (argc != 2)
-    {
+    if (argc != 2) {
         fprintf(stderr, "Usage: xmppServer <domain>\n");
         return EXIT_FAILURE;
     }

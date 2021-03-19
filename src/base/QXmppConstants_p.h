@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -20,7 +20,6 @@
  * Lesser General Public License for more details.
  *
  */
-
 
 #ifndef QXMPPCONSTANTS_H
 #define QXMPPCONSTANTS_H
@@ -45,10 +44,14 @@ extern const char* ns_sasl;
 extern const char* ns_bind;
 extern const char* ns_session;
 extern const char* ns_stanza;
+extern const char* ns_pre_approval;
+extern const char* ns_rosterver;
 // XEP-0009: Jabber-RPC
 extern const char* ns_rpc;
 // XEP-0020: Feature Negotiation
 extern const char* ns_feature_negotiation;
+// XEP-0027: Current Jabber OpenPGP Usage
+extern const char* ns_legacy_openpgp;
 // XEP-0030: Service Discovery
 extern const char* ns_disco_info;
 extern const char* ns_disco_items;
@@ -67,12 +70,18 @@ extern const char* ns_private;
 extern const char* ns_vcard;
 // XEP-0059: Result Set Management
 extern const char* ns_rsm;
+// XEP-0060: Publish-Subscribe
+extern const char* ns_pubsub;
 // XEP-0065: SOCKS5 Bytestreams
 extern const char* ns_bytestreams;
+// XEP-0066: Out of Band Data
+extern const char* ns_oob;
 // XEP-0071: XHTML-IM
-extern const char *ns_xhtml_im;
+extern const char* ns_xhtml;
+extern const char* ns_xhtml_im;
 // XEP-0077: In-Band Registration
 extern const char* ns_register;
+extern const char* ns_register_feature;
 // XEP-0078: Non-SASL Authentication
 extern const char* ns_auth;
 extern const char* ns_authFeature;
@@ -132,9 +141,52 @@ extern const char* ns_conference;
 extern const char* ns_carbons;
 // XEP-0297: Stanza Forwarding
 extern const char* ns_forwarding;
+// XEP-0308: Last Message Correction
+extern const char* ns_message_correct;
 // XEP-0313: Message Archive Management
 extern const char* ns_mam;
+// XEP-0319: Last User Interaction in Presence
+extern const char* ns_idle;
 // XEP-0333: Char Markers
 extern const char* ns_chat_markers;
+// XEP-0334: Message Processing Hints:
+extern const char* ns_message_processing_hints;
+// XEP-0352: Client State Indication
+extern const char* ns_csi;
+// XEP-0357: Push Notifications
+extern const char* ns_push;
+// XEP-0359: Unique and Stable Stanza IDs
+extern const char* ns_sid;
+// XEP-0363: HTTP File Upload
+extern const char* ns_http_upload;
+// XEP-0364: Current Off-the-Record Messaging Usage
+extern const char* ns_otr;
+// XEP-0367: Message Attaching
+extern const char* ns_message_attaching;
+// XEP-0369: Mediated Information eXchange (MIX)
+extern const char* ns_mix;
+extern const char* ns_mix_create_channel;
+extern const char* ns_mix_searchable;
+extern const char* ns_mix_node_messages;
+extern const char* ns_mix_node_participants;
+extern const char* ns_mix_node_presence;
+extern const char* ns_mix_node_config;
+extern const char* ns_mix_node_info;
+// XEP-0373: OpenPGP for XMPP
+extern const char* ns_ox;
+// XEP-0380: Explicit Message Encryption
+extern const char* ns_eme;
+// XEP-0382: Spoiler messages
+extern const char* ns_spoiler;
+// XEP-0384: OMEMO Encryption
+extern const char* ns_omemo;
+// XEP-0405: Mediated Information eXchange (MIX): Participant Server Requirements
+extern const char* ns_mix_pam;
+extern const char* ns_mix_roster;
+extern const char* ns_mix_presence;
+// XEP-0407: Mediated Information eXchange (MIX): Miscellaneous Capabilities
+extern const char* ns_mix_misc;
+// XEP-0428: Fallback Indication
+extern const char* ns_fallback_indication;
 
-#endif // QXMPPCONSTANTS_H
+#endif  // QXMPPCONSTANTS_H

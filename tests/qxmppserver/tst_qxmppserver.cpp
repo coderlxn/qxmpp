@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -23,6 +23,7 @@
 
 #include "QXmppClient.h"
 #include "QXmppServer.h"
+
 #include "util.h"
 
 class tst_QXmppServer : public QObject
@@ -41,13 +42,25 @@ void tst_QXmppServer::testConnect_data()
     QTest::addColumn<QString>("mechanism");
     QTest::addColumn<bool>("connected");
 
-    QTest::newRow("plain-good") << "testuser" << "testpwd" << "PLAIN" << true;
-    QTest::newRow("plain-bad-username") << "baduser" << "testpwd" << "PLAIN" << false;
-    QTest::newRow("plain-bad-password") << "testuser" << "badpwd" << "PLAIN" << false;
+    QTest::newRow("plain-good") << "testuser"
+                                << "testpwd"
+                                << "PLAIN" << true;
+    QTest::newRow("plain-bad-username") << "baduser"
+                                        << "testpwd"
+                                        << "PLAIN" << false;
+    QTest::newRow("plain-bad-password") << "testuser"
+                                        << "badpwd"
+                                        << "PLAIN" << false;
 
-    QTest::newRow("digest-good") << "testuser" << "testpwd" << "DIGEST-MD5" << true;
-    QTest::newRow("digest-bad-username") << "baduser" << "testpwd" << "DIGEST-MD5" << false;
-    QTest::newRow("digest-bad-password") << "testuser" << "badpwd" << "DIGEST-MD5" << false;
+    QTest::newRow("digest-good") << "testuser"
+                                 << "testpwd"
+                                 << "DIGEST-MD5" << true;
+    QTest::newRow("digest-bad-username") << "baduser"
+                                         << "testpwd"
+                                         << "DIGEST-MD5" << false;
+    QTest::newRow("digest-bad-password") << "testuser"
+                                         << "badpwd"
+                                         << "DIGEST-MD5" << false;
 }
 
 void tst_QXmppServer::testConnect()
@@ -79,10 +92,10 @@ void tst_QXmppServer::testConnect()
     client.setLogger(&logger);
 
     QEventLoop loop;
-    connect(&client, SIGNAL(connected()),
-            &loop, SLOT(quit()));
-    connect(&client, SIGNAL(disconnected()),
-            &loop, SLOT(quit()));
+    connect(&client, &QXmppClient::connected,
+            &loop, &QEventLoop::quit);
+    connect(&client, &QXmppClient::disconnected,
+            &loop, &QEventLoop::quit);
 
     QXmppConfiguration config;
     config.setDomain(testDomain);

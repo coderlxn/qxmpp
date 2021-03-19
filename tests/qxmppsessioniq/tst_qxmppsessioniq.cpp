@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Jeremy Lainé
@@ -23,6 +23,7 @@
  */
 
 #include "QXmppSessionIq.h"
+
 #include "util.h"
 
 class TestPackets : public QObject

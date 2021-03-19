@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -26,31 +26,16 @@
 
 #include "QXmppIq.h"
 
-/// \brief The QXmppPubSubItem class represents a publish-subscribe item
-/// as defined by XEP-0060: Publish-Subscribe.
-///
+#include <QSharedDataPointer>
 
-class QXMPP_EXPORT QXmppPubSubItem
-{
-public:
-    QString id() const;
-    void setId(const QString &id);
+#if QXMPP_DEPRECATED_SINCE(1, 2)
+#include "QXmppPubSubItem.h"
+#endif
 
-    QXmppElement contents() const;
-    void setContents(const QXmppElement &contents);
-
-    /// \cond
-    void parse(const QDomElement &element);
-    void toXml(QXmlStreamWriter *writer) const;
-    /// \endcond
-
-private:
-    QString m_id;
-    QXmppElement m_contents;
-};
+class QXmppPubSubIqPrivate;
 
 /// \brief The QXmppPubSubIq class represents an IQ used for the
-/// publish-subscribe mechanisms defined by XEP-0060: Publish-Subscribe.
+/// publish-subscribe mechanisms defined by \xep{0060}: Publish-Subscribe.
 ///
 /// \ingroup Stanzas
 
@@ -58,8 +43,7 @@ class QXMPP_EXPORT QXmppPubSubIq : public QXmppIq
 {
 public:
     /// This enum is used to describe a publish-subscribe query type.
-    enum QueryType
-    {
+    enum QueryType {
         AffiliationsQuery,
         DefaultQuery,
         ItemsQuery,
@@ -70,6 +54,12 @@ public:
         SubscriptionsQuery,
         UnsubscribeQuery
     };
+
+    QXmppPubSubIq();
+    QXmppPubSubIq(const QXmppPubSubIq &iq);
+    ~QXmppPubSubIq();
+
+    QXmppPubSubIq &operator=(const QXmppPubSubIq &iq);
 
     QXmppPubSubIq::QueryType queryType() const;
     void setQueryType(QXmppPubSubIq::QueryType queryType);
@@ -92,17 +82,12 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement&);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
-    QXmppPubSubIq::QueryType m_queryType;
-    QString m_queryJid;
-    QString m_queryNode;
-    QList<QXmppPubSubItem> m_items;
-    QString m_subscriptionId;
-    QString m_subscriptionType;
+    QSharedDataPointer<QXmppPubSubIqPrivate> d;
 };
 
-#endif
+#endif  // QXMPPPUBSUBIQ_H

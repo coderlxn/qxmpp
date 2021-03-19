@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Ian Reinhart Geiser
@@ -21,10 +21,10 @@
  *
  */
 
-
-#include <QtCore/QCoreApplication>
-#include "rpcClient.h"
 #include "QXmppLogger.h"
+
+#include "rpcClient.h"
+#include <QtCore/QCoreApplication>
 
 int main(int argc, char *argv[])
 {

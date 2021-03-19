@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -23,12 +23,13 @@
  *
  */
 
-
 #include "QXmppStanza.h"
+
+#include "QXmppConstants_p.h"
 #include "QXmppStanza_p.h"
 #include "QXmppUtils.h"
-#include "QXmppConstants_p.h"
 
+#include <QDateTime>
 #include <QDomElement>
 #include <QXmlStreamWriter>
 
@@ -55,20 +56,15 @@ QXmppExtendedAddress::QXmppExtendedAddress()
 ///
 /// \param other
 ///
-QXmppExtendedAddress::QXmppExtendedAddress(const QXmppExtendedAddress &other)
-    : d(other.d)
-{
-}
+QXmppExtendedAddress::QXmppExtendedAddress(const QXmppExtendedAddress &other) = default;
 
-QXmppExtendedAddress::~QXmppExtendedAddress()
-{
-}
+QXmppExtendedAddress::~QXmppExtendedAddress() = default;
 
 /// Assigns the other address to this one.
 ///
 /// \param other
 ///
-QXmppExtendedAddress& QXmppExtendedAddress::operator=(const QXmppExtendedAddress& other)
+QXmppExtendedAddress &QXmppExtendedAddress::operator=(const QXmppExtendedAddress &other)
 {
     d = other.d;
     return *this;
@@ -138,193 +134,373 @@ bool QXmppExtendedAddress::isValid() const
     return !d->type.isEmpty() && !d->jid.isEmpty();
 }
 
-/// \cond
+/// \cond
 void QXmppExtendedAddress::parse(const QDomElement &element)
 {
-    d->delivered = element.attribute("delivered") == "true";
-    d->description = element.attribute("desc");
-    d->jid = element.attribute("jid");
-    d->type = element.attribute("type");
+    d->delivered = element.attribute(QStringLiteral("delivered")) == QStringLiteral("true");
+    d->description = element.attribute(QStringLiteral("desc"));
+    d->jid = element.attribute(QStringLiteral("jid"));
+    d->type = element.attribute(QStringLiteral("type"));
 }
 
 void QXmppExtendedAddress::toXml(QXmlStreamWriter *xmlWriter) const
 {
-    xmlWriter->writeStartElement("address");
+    xmlWriter->writeStartElement(QStringLiteral("address"));
     if (d->delivered)
-        xmlWriter->writeAttribute("delivered", "true");
+        xmlWriter->writeAttribute(QStringLiteral("delivered"), QStringLiteral("true"));
     if (!d->description.isEmpty())
-        xmlWriter->writeAttribute("desc", d->description);
-    xmlWriter->writeAttribute("jid", d->jid);
-    xmlWriter->writeAttribute("type", d->type);
+        xmlWriter->writeAttribute(QStringLiteral("desc"), d->description);
+    xmlWriter->writeAttribute(QStringLiteral("jid"), d->jid);
+    xmlWriter->writeAttribute(QStringLiteral("type"), d->type);
     xmlWriter->writeEndElement();
 }
-/// \endcond
+/// \endcond
 
-QXmppStanza::Error::Error():
-    m_code(0),
-    m_type(static_cast<QXmppStanza::Error::Type>(-1)),
-    m_condition(static_cast<QXmppStanza::Error::Condition>(-1))
+class QXmppStanzaErrorPrivate : public QSharedData
+{
+public:
+    QXmppStanzaErrorPrivate();
+
+    int code;
+    std::optional<QXmppStanza::Error::Type> type;
+    std::optional<QXmppStanza::Error::Condition> condition;
+    QString text;
+    QString by;
+    QString redirectionUri;
+
+    // XEP-0363: HTTP File Upload
+    bool fileTooLarge;
+    qint64 maxFileSize;
+    QDateTime retryDate;
+};
+
+QXmppStanzaErrorPrivate::QXmppStanzaErrorPrivate()
+    : code(0),
+      fileTooLarge(false)
 {
 }
 
-QXmppStanza::Error::Error(Type type, Condition cond, const QString& text):
-    m_code(0),
-    m_type(type),
-    m_condition(cond),
-    m_text(text)
+///
+/// Default constructor
+///
+QXmppStanza::Error::Error()
+    : d(new QXmppStanzaErrorPrivate)
 {
 }
 
-QXmppStanza::Error::Error(const QString& type, const QString& cond,
-                          const QString& text):
-    m_code(0),
-    m_text(text)
+/// Copy constructor
+QXmppStanza::Error::Error(const QXmppStanza::Error &) = default;
+
+///
+/// Initializes an error with a type, condition and text.
+///
+QXmppStanza::Error::Error(Type type, Condition cond, const QString &text)
+    : d(new QXmppStanzaErrorPrivate)
 {
-    setTypeFromStr(type);
-    setConditionFromStr(cond);
+    d->type = type;
+    d->condition = cond;
+    d->text = text;
 }
 
+///
+/// Initializes an error with a type, condition and text (all from strings).
+///
+QXmppStanza::Error::Error(const QString &type, const QString &cond,
+                          const QString &text)
+    : d(new QXmppStanzaErrorPrivate)
+{
+    d->text = text;
+    d->type = typeFromString(type);
+    d->condition = conditionFromString(cond);
+}
+
+/// Default destructor
+QXmppStanza::Error::~Error() = default;
+
+/// Copy operator
+QXmppStanza::Error &QXmppStanza::Error::operator=(const QXmppStanza::Error &) = default;
+
+///
+/// Returns the human-readable description of the error.
+///
 QString QXmppStanza::Error::text() const
 {
-    return m_text;
+    return d->text;
 }
 
-void QXmppStanza::Error::setText(const QString& text)
+///
+/// Sets the description of the error.
+///
+void QXmppStanza::Error::setText(const QString &text)
 {
-    m_text = text;
+    d->text = text;
 }
 
+///
+/// Returns the error code.
+///
 int QXmppStanza::Error::code() const
 {
-    return m_code;
+    return d->code;
 }
 
+///
+/// Sets the error code.
+///
 void QXmppStanza::Error::setCode(int code)
 {
-    m_code = code;
+    d->code = code;
 }
 
+///
+/// Returns the error condition.
+///
+/// The conditions QXmppStanza::Error::Gone and QXmppStanza::Error::Redirect
+/// can be used in combination with redirectUri().
+///
 QXmppStanza::Error::Condition QXmppStanza::Error::condition() const
 {
-    return m_condition;
+    return d->condition.value_or(QXmppStanza::Error::Condition(-1));
 }
 
+///
+/// Sets the error condition.
+///
+/// The conditions QXmppStanza::Error::Gone and QXmppStanza::Error::Redirect
+/// can be used in combination with setRedirectUri().
+///
 void QXmppStanza::Error::setCondition(QXmppStanza::Error::Condition cond)
 {
-    m_condition = cond;
+    if (int(cond) < 0) {
+        d->condition = std::nullopt;
+        return;
+    }
+    d->condition = cond;
 }
 
+///
+/// Returns the type of the error.
+///
 QXmppStanza::Error::Type QXmppStanza::Error::type() const
 {
-    return m_type;
+    return d->type.value_or(QXmppStanza::Error::Type(-1));
 }
 
+///
+/// Returns the optional JID of the creator of the error.
+///
+/// This is useful to ditinguish between errors generated by the local server
+/// and by the remote server for example. However, the value is optional.
+///
+/// \since QXmpp 1.3
+///
+QString QXmppStanza::Error::by() const
+{
+    return d->by;
+}
+
+///
+/// Sets the optional JID of the creator of the error.
+///
+/// This is useful to ditinguish between errors generated by the local server
+/// and by the remote server for example. However, the value is optional.
+///
+/// \since QXmpp 1.3
+///
+void QXmppStanza::Error::setBy(const QString &by)
+{
+    d->by = by;
+}
+
+///
+/// Sets the type of the error.
+///
 void QXmppStanza::Error::setType(QXmppStanza::Error::Type type)
 {
-    m_type = type;
+    if (int(type) < 0) {
+        d->type = std::nullopt;
+        return;
+    }
+    d->type = type;
+}
+
+///
+/// Returns the optionally included redirection URI for the error conditions
+/// QXmppStanza::Error::Gone and QXmppStanza::Error::Redirect.
+///
+/// \sa setRedirectionUri()
+///
+/// \since QXmpp 1.3
+///
+QString QXmppStanza::Error::redirectionUri() const
+{
+    return d->redirectionUri;
+}
+
+///
+/// Sets the optional redirection URI for the error conditions
+/// QXmppStanza::Error::Gone and QXmppStanza::Error::Redirect.
+///
+/// \sa redirectionUri()
+///
+/// \since QXmpp 1.3
+///
+void QXmppStanza::Error::setRedirectionUri(const QString &redirectionUri)
+{
+    d->redirectionUri = redirectionUri;
+}
+
+/// Returns true, if an HTTP File Upload failed, because the file was too
+/// large.
+///
+/// \since QXmpp 1.1
+
+bool QXmppStanza::Error::fileTooLarge() const
+{
+    return d->fileTooLarge;
+}
+
+/// Sets whether the requested file for HTTP File Upload was too large.
+///
+/// You should also set maxFileSize in this case.
+///
+/// \since QXmpp 1.1
+
+void QXmppStanza::Error::setFileTooLarge(bool fileTooLarge)
+{
+    d->fileTooLarge = fileTooLarge;
+}
+
+/// Returns the maximum file size allowed for uploading via. HTTP File Upload.
+///
+/// \since QXmpp 1.1
+
+qint64 QXmppStanza::Error::maxFileSize() const
+{
+    return d->maxFileSize;
+}
+
+/// Sets the maximum file size allowed for uploading via. HTTP File Upload.
+///
+/// This sets fileTooLarge to true.
+///
+/// \since QXmpp 1.1
+
+void QXmppStanza::Error::setMaxFileSize(qint64 maxFileSize)
+{
+    setFileTooLarge(true);
+    d->maxFileSize = maxFileSize;
+}
+
+/// Returns when to retry the upload request via. HTTP File Upload.
+///
+/// \since QXmpp 1.1
+
+QDateTime QXmppStanza::Error::retryDate() const
+{
+    return d->retryDate;
+}
+
+/// Sets the datetime when the client can retry to request the upload slot.
+
+void QXmppStanza::Error::setRetryDate(const QDateTime &retryDate)
+{
+    d->retryDate = retryDate;
 }
 
 /// \cond
-QString QXmppStanza::Error::getTypeStr() const
-{
-    switch(m_type)
-    {
-    case Cancel:
-        return "cancel";
-    case Continue:
-        return "continue";
-    case Modify:
-        return "modify";
-    case Auth:
-        return "auth";
-    case Wait:
-        return "wait";
-    default:
-        return "";
-    }
-}
-
-QString QXmppStanza::Error::getConditionStr() const
-{
-    return strFromCondition(m_condition);
-}
-
-void QXmppStanza::Error::setTypeFromStr(const QString& type)
-{
-    if(type == "cancel")
-        setType(Cancel);
-    else if(type == "continue")
-        setType(Continue);
-    else if(type == "modify")
-        setType(Modify);
-    else if(type == "auth")
-        setType(Auth);
-    else if(type == "wait")
-        setType(Wait);
-    else
-        setType(static_cast<QXmppStanza::Error::Type>(-1));
-}
-
-void QXmppStanza::Error::setConditionFromStr(const QString& type)
-{
-    setCondition(conditionFromStr(type));
-}
-
 void QXmppStanza::Error::parse(const QDomElement &errorElement)
 {
-    setCode(errorElement.attribute("code").toInt());
-    setTypeFromStr(errorElement.attribute("type"));
+    d->code = errorElement.attribute(QStringLiteral("code")).toInt();
+    d->type = typeFromString(errorElement.attribute(QStringLiteral("type")));
+    d->by = errorElement.attribute(QStringLiteral("by"));
 
-    QString text;
-    QString cond;
     QDomElement element = errorElement.firstChildElement();
-    while(!element.isNull())
-    {
-        if(element.tagName() == "text")
-            text = element.text();
-        else if(element.namespaceURI() == ns_stanza)
-        {
-            cond = element.tagName();
+    while (!element.isNull()) {
+        if (element.namespaceURI() == ns_stanza) {
+            if (element.tagName() == QStringLiteral("text")) {
+                d->text = element.text();
+            } else {
+                d->condition = conditionFromString(element.tagName());
+
+                // redirection URI
+                if (d->condition == Gone || d->condition == Redirect) {
+                    d->redirectionUri = element.text();
+
+                    // .text() returns empty string if nothing was set
+                    if (d->redirectionUri.isEmpty())
+                        d->redirectionUri.clear();
+                }
+            }
+        } else if (element.namespaceURI() == ns_http_upload) {
+            // XEP-0363: HTTP File Upload
+            // file is too large
+            if (element.tagName() == QStringLiteral("file-too-large")) {
+                d->fileTooLarge = true;
+                d->maxFileSize = element.firstChildElement(QStringLiteral("max-file-size"))
+                                     .text()
+                                     .toLongLong();
+                // retry later
+            } else if (element.tagName() == QStringLiteral("retry")) {
+                d->retryDate = QXmppUtils::datetimeFromString(
+                    element.attribute(QStringLiteral("stamp")));
+            }
         }
         element = element.nextSiblingElement();
     }
-
-    setConditionFromStr(cond);
-    setText(text);
 }
 
-void QXmppStanza::Error::toXml( QXmlStreamWriter *writer ) const
+void QXmppStanza::Error::toXml(QXmlStreamWriter *writer) const
 {
-    QString cond = getConditionStr();
-    QString type = getTypeStr();
-
-    if(cond.isEmpty() && type.isEmpty())
+    if (!d->condition && !d->type)
         return;
 
-    writer->writeStartElement("error");
-    helperToXmlAddAttribute(writer, "type", type);
+    writer->writeStartElement(QStringLiteral("error"));
+    helperToXmlAddAttribute(writer, QStringLiteral("by"), d->by);
+    if (d->type) {
+        writer->writeAttribute(QStringLiteral("type"), typeToString(*d->type));
+    }
 
-    if (m_code > 0)
-        helperToXmlAddAttribute(writer, "code", QString::number(m_code));
+    if (d->code > 0)
+        helperToXmlAddAttribute(writer, QStringLiteral("code"), QString::number(d->code));
 
-    if(!cond.isEmpty())
-    {
-        writer->writeStartElement(cond);
-        writer->writeAttribute("xmlns", ns_stanza);
+    if (d->condition) {
+        writer->writeStartElement(conditionToString(*d->condition));
+        writer->writeDefaultNamespace(ns_stanza);
+
+        // redirection URI
+        if (!d->redirectionUri.isEmpty() && (d->condition == Gone || d->condition == Redirect)) {
+            writer->writeCharacters(d->redirectionUri);
+        }
+
         writer->writeEndElement();
     }
-    if(!m_text.isEmpty())
-    {
-        writer->writeStartElement("text");
-        writer->writeAttribute("xml:lang", "en");
-        writer->writeAttribute("xmlns", ns_stanza);
-        writer->writeCharacters(m_text);
+    if (!d->text.isEmpty()) {
+        writer->writeStartElement(QStringLiteral("text"));
+        writer->writeAttribute(QStringLiteral("xml:lang"), QStringLiteral("en"));
+        writer->writeDefaultNamespace(ns_stanza);
+        writer->writeCharacters(d->text);
+        writer->writeEndElement();
+    }
+
+    // XEP-0363: HTTP File Upload
+    if (d->fileTooLarge) {
+        writer->writeStartElement(QStringLiteral("file-too-large"));
+        writer->writeDefaultNamespace(ns_http_upload);
+        helperToXmlAddTextElement(writer, QStringLiteral("max-file-size"),
+                                  QString::number(d->maxFileSize));
+        writer->writeEndElement();
+    } else if (!d->retryDate.isNull() && d->retryDate.isValid()) {
+        writer->writeStartElement(QStringLiteral("retry"));
+        writer->writeDefaultNamespace(ns_http_upload);
+        writer->writeAttribute(QStringLiteral("stamp"),
+                               QXmppUtils::datetimeToString(d->retryDate));
         writer->writeEndElement();
     }
 
     writer->writeEndElement();
 }
-/// \endcond
+/// \endcond
 
 class QXmppStanzaPrivate : public QSharedData
 {
@@ -343,7 +519,7 @@ public:
 /// \param from
 /// \param to
 
-QXmppStanza::QXmppStanza(const QString& from, const QString& to)
+QXmppStanza::QXmppStanza(const QString &from, const QString &to)
     : d(new QXmppStanzaPrivate)
 {
     d->to = to;
@@ -365,7 +541,7 @@ QXmppStanza::~QXmppStanza()
 
 /// Assigns \a other to this stanza.
 
-QXmppStanza& QXmppStanza::operator=(const QXmppStanza &other)
+QXmppStanza &QXmppStanza::operator=(const QXmppStanza &other)
 {
     d = other.d;
     return *this;
@@ -383,7 +559,7 @@ QString QXmppStanza::to() const
 ///
 /// \param to
 
-void QXmppStanza::setTo(const QString& to)
+void QXmppStanza::setTo(const QString &to)
 {
     d->to = to;
 }
@@ -399,7 +575,7 @@ QString QXmppStanza::from() const
 ///
 /// \param from
 
-void QXmppStanza::setFrom(const QString& from)
+void QXmppStanza::setFrom(const QString &from)
 {
     d->from = from;
 }
@@ -415,7 +591,7 @@ QString QXmppStanza::id() const
 ///
 /// \param id
 
-void QXmppStanza::setId(const QString& id)
+void QXmppStanza::setId(const QString &id)
 {
     d->id = id;
 }
@@ -431,7 +607,7 @@ QString QXmppStanza::lang() const
 ///
 /// \param lang
 
-void QXmppStanza::setLang(const QString& lang)
+void QXmppStanza::setLang(const QString &lang)
 {
     d->lang = lang;
 }
@@ -447,7 +623,7 @@ QXmppStanza::Error QXmppStanza::error() const
 ///
 /// \param error
 
-void QXmppStanza::setError(const QXmppStanza::Error& error)
+void QXmppStanza::setError(const QXmppStanza::Error &error)
 {
     d->error = error;
 }
@@ -471,7 +647,7 @@ void QXmppStanza::setExtensions(const QXmppElementList &extensions)
 }
 
 /// Returns the stanza's extended addresses as defined by
-/// XEP-0033: Extended Stanza Addressing.
+/// \xep{0033}: Extended Stanza Addressing.
 
 QList<QXmppExtendedAddress> QXmppStanza::extendedAddresses() const
 {
@@ -479,16 +655,19 @@ QList<QXmppExtendedAddress> QXmppStanza::extendedAddresses() const
 }
 
 /// Sets the stanza's extended addresses as defined by
-/// XEP-0033: Extended Stanza Addressing.
+/// \xep{0033}: Extended Stanza Addressing.
 
 void QXmppStanza::setExtendedAddresses(const QList<QXmppExtendedAddress> &addresses)
 {
     d->extendedAddresses = addresses;
 }
 
-/// Indicates if the QXmppStanza is a stanza in the XMPP sence (i. e. a message,
+///
+/// Indicates if the QXmppStanza is a stanza in the XMPP sense (i. e. a message,
 /// iq or presence)
-
+///
+/// \since QXmpp 1.0
+///
 bool QXmppStanza::isXmppStanza() const
 {
     return false;
@@ -510,7 +689,7 @@ void QXmppStanza::parse(const QDomElement &element)
     d->lang = element.attribute("lang");
 
     QDomElement errorElement = element.firstChildElement("error");
-    if(!errorElement.isNull())
+    if (!errorElement.isNull())
         d->error.parse(errorElement);
 
     // XEP-0033: Extended Stanza Addressing
@@ -529,14 +708,14 @@ void QXmppStanza::extensionsToXml(QXmlStreamWriter *xmlWriter) const
     // XEP-0033: Extended Stanza Addressing
     if (!d->extendedAddresses.isEmpty()) {
         xmlWriter->writeStartElement("addresses");
-        xmlWriter->writeAttribute("xmlns", ns_extended_addressing);
-        foreach (const QXmppExtendedAddress &address, d->extendedAddresses)
+        xmlWriter->writeDefaultNamespace(ns_extended_addressing);
+        for (const auto &address : d->extendedAddresses)
             address.toXml(xmlWriter);
         xmlWriter->writeEndElement();
     }
 
     // other extensions
-    foreach (const QXmppElement &extension, d->extensions)
+    for (const auto &extension : d->extensions)
         extension.toXml(xmlWriter);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,12 +21,12 @@
  *
  */
 
+#include "QXmppVCardManager.h"
 
 #include "QXmppClient.h"
 #include "QXmppConstants_p.h"
 #include "QXmppUtils.h"
 #include "QXmppVCardIq.h"
-#include "QXmppVCardManager.h"
 
 class QXmppVCardManagerPrivate
 {
@@ -54,7 +54,7 @@ QXmppVCardManager::~QXmppVCardManager()
 QString QXmppVCardManager::requestVCard(const QString& jid)
 {
     QXmppVCardIq request(jid);
-    if(client()->sendPacket(request))
+    if (client()->sendPacket(request))
         return request.id();
     else
         return QString();
@@ -107,14 +107,13 @@ QStringList QXmppVCardManager::discoveryFeatures() const
     return QStringList() << ns_vcard;
 }
 
-bool QXmppVCardManager::handleStanza(const QDomElement &element)
+bool QXmppVCardManager::handleStanza(const QDomElement& element)
 {
-    if(element.tagName() == "iq" && QXmppVCardIq::isVCard(element))
-    {
+    if (element.tagName() == "iq" && QXmppVCardIq::isVCard(element)) {
         QXmppVCardIq vCardIq;
         vCardIq.parse(element);
 
-        if (vCardIq.from().isEmpty()) {
+        if (vCardIq.from().isEmpty() || vCardIq.from() == client()->configuration().jidBare()) {
             d->clientVCard = vCardIq;
             d->isClientVCardReceived = true;
             emit clientVCardReceived();

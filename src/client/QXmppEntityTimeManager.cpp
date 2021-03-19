@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,16 +21,15 @@
  *
  */
 
-
 #include "QXmppEntityTimeManager.h"
-
-#include <QDomElement>
-#include <QDateTime>
 
 #include "QXmppClient.h"
 #include "QXmppConstants_p.h"
 #include "QXmppEntityTimeIq.h"
 #include "QXmppUtils.h"
+
+#include <QDateTime>
+#include <QDomElement>
 
 /// Request the time from an XMPP entity.
 ///
@@ -41,7 +40,7 @@ QString QXmppEntityTimeManager::requestTime(const QString& jid)
     QXmppEntityTimeIq request;
     request.setType(QXmppIq::Get);
     request.setTo(jid);
-    if(client()->sendPacket(request))
+    if (client()->sendPacket(request))
         return request.id();
     else
         return QString();
@@ -53,15 +52,13 @@ QStringList QXmppEntityTimeManager::discoveryFeatures() const
     return QStringList() << ns_entity_time;
 }
 
-bool QXmppEntityTimeManager::handleStanza(const QDomElement &element)
+bool QXmppEntityTimeManager::handleStanza(const QDomElement& element)
 {
-    if(element.tagName() == "iq" && QXmppEntityTimeIq::isEntityTimeIq(element))
-    {
+    if (element.tagName() == "iq" && QXmppEntityTimeIq::isEntityTimeIq(element)) {
         QXmppEntityTimeIq entityTime;
         entityTime.parse(element);
 
-        if(entityTime.type() == QXmppIq::Get)
-        {
+        if (entityTime.type() == QXmppIq::Get) {
             // respond to query
             QXmppEntityTimeIq responseIq;
             responseIq.setType(QXmppIq::Result);

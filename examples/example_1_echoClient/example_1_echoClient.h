@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Manjeet Dahiya
@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef ECHOCLIENT_H
 #define ECHOCLIENT_H
 
@@ -32,11 +31,11 @@ class echoClient : public QXmppClient
     Q_OBJECT
 
 public:
-    echoClient(QObject *parent = 0);
-    ~echoClient();
+    echoClient(QObject *parent = nullptr);
+    ~echoClient() override;
 
 public slots:
-    void messageReceived(const QXmppMessage&);
+    void messageReceived(const QXmppMessage &);
 };
 
-#endif // ECHOCLIENT_H
+#endif  // ECHOCLIENT_H

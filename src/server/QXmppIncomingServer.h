@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -40,12 +40,12 @@ class QXMPP_EXPORT QXmppIncomingServer : public QXmppStream
 
 public:
     QXmppIncomingServer(QSslSocket *socket, const QString &domain, QObject *parent);
-    ~QXmppIncomingServer();
+    ~QXmppIncomingServer() override;
 
-    bool isConnected() const;
+    bool isConnected() const override;
     QString localStreamId() const;
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when a dialback verify request is received.
     void dialbackRequestReceived(const QXmppDialback &result);
 
@@ -54,17 +54,17 @@ signals:
 
 protected:
     /// \cond
-    void handleStanza(const QDomElement &stanzaElement);
-    void handleStream(const QDomElement &streamElement);
+    void handleStanza(const QDomElement &stanzaElement) override;
+    void handleStream(const QDomElement &streamElement) override;
     /// \endcond
 
-private slots:
+private Q_SLOTS:
     void slotDialbackResponseReceived(const QXmppDialback &dialback);
     void slotSocketDisconnected();
 
 private:
     Q_DISABLE_COPY(QXmppIncomingServer)
-    QXmppIncomingServerPrivate* d;
+    QXmppIncomingServerPrivate *d;
     friend class QXmppIncomingServerPrivate;
 };
 

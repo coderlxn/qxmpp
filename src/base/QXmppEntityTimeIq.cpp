@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,13 +21,12 @@
  *
  */
 
-
 #include "QXmppEntityTimeIq.h"
-
-#include <QDomElement>
 
 #include "QXmppConstants_p.h"
 #include "QXmppUtils.h"
+
+#include <QDomElement>
 
 /// Returns the timezone offset in seconds.
 ///
@@ -80,10 +79,9 @@ void QXmppEntityTimeIq::parseElementFromChild(const QDomElement &element)
 void QXmppEntityTimeIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
     writer->writeStartElement("time");
-    writer->writeAttribute("xmlns", ns_entity_time);
+    writer->writeDefaultNamespace(ns_entity_time);
 
-    if(m_utc.isValid())
-    {
+    if (m_utc.isValid()) {
         helperToXmlAddTextElement(writer, "tzo", QXmppUtils::timezoneOffsetToString(m_tzo));
         helperToXmlAddTextElement(writer, "utc", QXmppUtils::datetimeToString(m_utc));
     }

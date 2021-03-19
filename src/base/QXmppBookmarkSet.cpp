@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,10 +21,11 @@
  *
  */
 
-#include <QDomElement>
-
 #include "QXmppBookmarkSet.h"
+
 #include "QXmppUtils.h"
+
+#include <QDomElement>
 
 static const char *ns_bookmarks = "storage:bookmarks";
 
@@ -177,29 +178,25 @@ void QXmppBookmarkSet::setUrls(const QList<QXmppBookmarkUrl> &urls)
 /// \cond
 bool QXmppBookmarkSet::isBookmarkSet(const QDomElement &element)
 {
-    return element.tagName() == "storage" &&
-           element.namespaceURI() == ns_bookmarks;
+    return element.tagName() == QStringLiteral("storage") &&
+        element.namespaceURI() == ns_bookmarks;
 }
 
 void QXmppBookmarkSet::parse(const QDomElement &element)
 {
     QDomElement childElement = element.firstChildElement();
-    while (!childElement.isNull())
-    {
-        if (childElement.tagName() == "conference")
-        {
+    while (!childElement.isNull()) {
+        if (childElement.tagName() == QStringLiteral("conference")) {
             QXmppBookmarkConference conference;
-            conference.setAutoJoin(childElement.attribute("autojoin") == "true" || childElement.attribute("autojoin") == "1");
-            conference.setJid(childElement.attribute("jid"));
-            conference.setName(childElement.attribute("name"));
-            conference.setNickName(childElement.firstChildElement("nick").text());
+            conference.setAutoJoin(childElement.attribute(QStringLiteral("autojoin")) == QStringLiteral("true") || childElement.attribute("autojoin") == "1");
+            conference.setJid(childElement.attribute(QStringLiteral("jid")));
+            conference.setName(childElement.attribute(QStringLiteral("name")));
+            conference.setNickName(childElement.firstChildElement(QStringLiteral("nick")).text());
             m_conferences << conference;
-        }
-        else if (childElement.tagName() == "url")
-        {
+        } else if (childElement.tagName() == QStringLiteral("url")) {
             QXmppBookmarkUrl url;
-            url.setName(childElement.attribute("name"));
-            url.setUrl(childElement.attribute("url"));
+            url.setName(childElement.attribute(QStringLiteral("name")));
+            url.setUrl(QUrl(childElement.attribute(QStringLiteral("url"))));
             m_urls << url;
         }
         childElement = childElement.nextSiblingElement();
@@ -208,24 +205,22 @@ void QXmppBookmarkSet::parse(const QDomElement &element)
 
 void QXmppBookmarkSet::toXml(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("storage");
-    writer->writeAttribute("xmlns", ns_bookmarks);
-    foreach (const QXmppBookmarkConference &conference, m_conferences)
-    {
-        writer->writeStartElement("conference");
+    writer->writeStartElement(QStringLiteral("storage"));
+    writer->writeDefaultNamespace(ns_bookmarks);
+    for (const auto &conference : m_conferences) {
+        writer->writeStartElement(QStringLiteral("conference"));
         if (conference.autoJoin())
-            helperToXmlAddAttribute(writer, "autojoin", "true");
-        helperToXmlAddAttribute(writer, "jid", conference.jid());
-        helperToXmlAddAttribute(writer, "name", conference.name());
+            helperToXmlAddAttribute(writer, QStringLiteral("autojoin"), QStringLiteral("true"));
+        helperToXmlAddAttribute(writer, QStringLiteral("jid"), conference.jid());
+        helperToXmlAddAttribute(writer, QStringLiteral("name"), conference.name());
         if (!conference.nickName().isEmpty())
-            helperToXmlAddTextElement(writer, "nick", conference.nickName());
+            helperToXmlAddTextElement(writer, QStringLiteral("nick"), conference.nickName());
         writer->writeEndElement();
     }
-    foreach (const QXmppBookmarkUrl &url, m_urls)
-    {
-        writer->writeStartElement("url");
-        helperToXmlAddAttribute(writer, "name", url.name());
-        helperToXmlAddAttribute(writer, "url", url.url().toString());
+    for (const auto &url : m_urls) {
+        writer->writeStartElement(QStringLiteral("url"));
+        helperToXmlAddAttribute(writer, QStringLiteral("name"), url.name());
+        helperToXmlAddAttribute(writer, QStringLiteral("url"), url.url().toString());
         writer->writeEndElement();
     }
     writer->writeEndElement();

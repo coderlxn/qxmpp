@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,13 +21,14 @@
  *
  */
 
-#include <QDomElement>
-#include <QMetaClassInfo>
-#include <QStringList>
+#include "QXmppServerExtension.h"
 
 #include "QXmppLogger.h"
 #include "QXmppServer.h"
-#include "QXmppServerExtension.h"
+
+#include <QDomElement>
+#include <QMetaClassInfo>
+#include <QStringList>
 
 class QXmppServerExtensionPrivate
 {
@@ -38,7 +39,7 @@ public:
 QXmppServerExtension::QXmppServerExtension()
     : d(new QXmppServerExtensionPrivate)
 {
-    d->server = 0;
+    d->server = nullptr;
 }
 
 QXmppServerExtension::~QXmppServerExtension()
@@ -148,4 +149,3 @@ void QXmppServerExtension::setServer(QXmppServer *server)
 {
     d->server = server;
 }
-

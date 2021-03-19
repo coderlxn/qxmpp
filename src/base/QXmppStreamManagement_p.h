@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Niels Ole Salscheider
@@ -30,6 +30,9 @@
 #include <QDomDocument>
 #include <QXmlStreamWriter>
 
+class QXmppStream;
+
+//
 //  W A R N I N G
 //  -------------
 //
@@ -100,13 +103,13 @@ private:
 class QXMPP_AUTOTEST_EXPORT QXmppStreamManagementResume
 {
 public:
-    QXmppStreamManagementResume(const unsigned h = 0, const QString& previd = QString());
+    QXmppStreamManagementResume(const unsigned h = 0, const QString &previd = QString());
 
     unsigned h() const;
     void setH(const unsigned h);
 
     QString prevId() const;
-    void setPrevId(const QString& id);
+    void setPrevId(const QString &id);
 
     static bool isStreamManagementResume(const QDomElement &element);
 
@@ -123,13 +126,13 @@ private:
 class QXMPP_AUTOTEST_EXPORT QXmppStreamManagementResumed
 {
 public:
-    QXmppStreamManagementResumed(const unsigned h = 0, const QString& previd = QString());
+    QXmppStreamManagementResumed(const unsigned h = 0, const QString &previd = QString());
 
     unsigned h() const;
     void setH(const unsigned h);
 
     QString prevId() const;
-    void setPrevId(const QString& id);
+    void setPrevId(const QString &id);
 
     static bool isStreamManagementResumed(const QDomElement &element);
 
@@ -189,6 +192,40 @@ public:
     /// \cond
     static void toXml(QXmlStreamWriter *writer);
     /// \endcond
+};
+
+//
+// This manager is used in the QXmppStream. It contains the parts of stream
+// management that are shared between server and client connections.
+//
+class QXmppStreamManager
+{
+public:
+    explicit QXmppStreamManager(QXmppStream *stream);
+
+    unsigned int lastIncomingSequenceNumber() const;
+
+    void handleDisconnect();
+    void handleStart();
+    void handlePacketSent(const QXmppStanza &packet, const QByteArray &data);
+    bool handleStanza(const QDomElement &stanza);
+
+    void resetCache();
+    void enableStreamManagement(bool resetSequenceNumber);
+    void setAcknowledgedSequenceNumber(unsigned int sequenceNumber);
+
+private:
+    void handleAcknowledgement(const QDomElement &element);
+
+    void sendAcknowledgement();
+    void sendAcknowledgementRequest();
+
+    QXmppStream *stream;
+
+    bool m_enabled = false;
+    QMap<unsigned int, QByteArray> m_unacknowledgedStanzas;
+    unsigned int m_lastOutgoingSequenceNumber = 0;
+    unsigned int m_lastIncomingSequenceNumber = 0;
 };
 
 #endif

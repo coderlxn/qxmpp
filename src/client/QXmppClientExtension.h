@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -28,7 +28,6 @@
 #include "QXmppLogger.h"
 
 class QDomElement;
-class QStringList;
 
 class QXmppClient;
 class QXmppClientExtensionPrivate;
@@ -50,7 +49,7 @@ class QXMPP_EXPORT QXmppClientExtension : public QXmppLoggable
 
 public:
     QXmppClientExtension();
-    virtual ~QXmppClientExtension();
+    ~QXmppClientExtension() override;
 
     virtual QStringList discoveryFeatures() const;
     virtual QList<QXmppDiscoveryIq::Identity> discoveryIdentities() const;
@@ -68,7 +67,7 @@ protected:
     virtual void setClient(QXmppClient *client);
 
 private:
-    QXmppClientExtensionPrivate * const d;
+    QXmppClientExtensionPrivate *const d;
 
     friend class QXmppClient;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -26,11 +26,17 @@
 
 #include "QXmppIq.h"
 
+///
+/// \brief QXmppPingIq represents a Ping IQ as defined by \xep{0199}: XMPP
+/// Ping.
+///
+/// \ingroup Stanzas
+///
 class QXMPP_EXPORT QXmppPingIq : public QXmppIq
 {
 public:
     QXmppPingIq();
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     static bool isPingIq(const QDomElement &element);
 };
 

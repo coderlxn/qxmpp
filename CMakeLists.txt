@@ -1,26 +1,36 @@
-project(qxmpp)
+cmake_minimum_required(VERSION 3.3)
+project(qxmpp VERSION 1.5.0)
 
-cmake_minimum_required(VERSION 3.2)
+set(SO_VERSION 3)
 
-set(VERSION_MAJOR 0)
-set(VERSION_MINOR 9)
-set(VERSION_PATCH 4)
-set(SO_VERSION 0)
-set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH VERSION_STRING)
+# C++ standard settings:
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/modules")
 
-find_package(Qt5 REQUIRED COMPONENTS Core Network Xml)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network Xml)
+find_package(Qt${QT_VERSION_MAJOR} 5.9.2 REQUIRED COMPONENTS Core Network Xml)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 include(GNUInstallDirs)
 
 option(BUILD_TESTS "Build tests." ON)
+option(BUILD_INTERNAL_TESTS "Build internal tests." OFF)
 option(BUILD_DOCUMENTATION "Build API documentation." OFF)
 option(BUILD_EXAMPLES "Build examples." ON)
+
+option(WITH_GSTREAMER "Build with GStreamer support for Jingle" OFF)
+
+add_definitions(
+    -DQT_DISABLE_DEPRECATED_BEFORE=0x050F00
+    -DQURL_NO_CAST_FROM_STRING
+    -DQT_NO_CAST_TO_ASCII
+    -DQT_NO_FOREACH
+)
 
 add_subdirectory(src)
 
@@ -47,7 +57,7 @@ configure_package_config_file(
 
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/QXmppConfigVersion.cmake
-    VERSION ${VERSION_STRING}
+    VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 

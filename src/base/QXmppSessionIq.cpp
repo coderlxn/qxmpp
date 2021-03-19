@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -22,24 +22,26 @@
  *
  */
 
-#include <QDomElement>
-#include <QXmlStreamWriter>
-
 #include "QXmppSessionIq.h"
+
 #include "QXmppConstants_p.h"
 #include "QXmppUtils.h"
+
+#include <QDomElement>
+#include <QXmlStreamWriter>
 
 /// \cond
 bool QXmppSessionIq::isSessionIq(const QDomElement &element)
 {
-    QDomElement sessionElement = element.firstChildElement("session");
+    QDomElement sessionElement = element.firstChildElement(QStringLiteral("session"));
     return (sessionElement.namespaceURI() == ns_session);
 }
 
 void QXmppSessionIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("session");;
-    writer->writeAttribute("xmlns", ns_session);
+    writer->writeStartElement(QStringLiteral("session"));
+    ;
+    writer->writeDefaultNamespace(ns_session);
     writer->writeEndElement();
 }
 /// \endcond

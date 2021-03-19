@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -22,13 +22,14 @@
  *
  */
 
+#include "QXmppBindIq.h"
+
+#include "QXmppConstants_p.h"
+#include "QXmppUtils.h"
+
 #include <QDomElement>
 #include <QTextStream>
 #include <QXmlStreamWriter>
-
-#include "QXmppBindIq.h"
-#include "QXmppUtils.h"
-#include "QXmppConstants_p.h"
 
 /// Returns the bound JID.
 ///
@@ -42,7 +43,7 @@ QString QXmppBindIq::jid() const
 ///
 /// \param jid
 
-void QXmppBindIq::setJid(const QString& jid)
+void QXmppBindIq::setJid(const QString &jid)
 {
     m_jid = jid;
 }
@@ -59,7 +60,7 @@ QString QXmppBindIq::resource() const
 ///
 /// \param resource
 
-void QXmppBindIq::setResource(const QString& resource)
+void QXmppBindIq::setResource(const QString &resource)
 {
     m_resource = resource;
 }
@@ -67,25 +68,25 @@ void QXmppBindIq::setResource(const QString& resource)
 /// \cond
 bool QXmppBindIq::isBindIq(const QDomElement &element)
 {
-    QDomElement bindElement = element.firstChildElement("bind");
+    QDomElement bindElement = element.firstChildElement(QStringLiteral("bind"));
     return (bindElement.namespaceURI() == ns_bind);
 }
 
 void QXmppBindIq::parseElementFromChild(const QDomElement &element)
 {
-    QDomElement bindElement = element.firstChildElement("bind");
-    m_jid = bindElement.firstChildElement("jid").text();
-    m_resource = bindElement.firstChildElement("resource").text();
+    QDomElement bindElement = element.firstChildElement(QStringLiteral("bind"));
+    m_jid = bindElement.firstChildElement(QStringLiteral("jid")).text();
+    m_resource = bindElement.firstChildElement(QStringLiteral("resource")).text();
 }
 
 void QXmppBindIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("bind");
-    writer->writeAttribute("xmlns", ns_bind);
+    writer->writeStartElement(QStringLiteral("bind"));
+    writer->writeDefaultNamespace(ns_bind);
     if (!m_jid.isEmpty())
-        helperToXmlAddTextElement(writer, "jid", m_jid);
+        helperToXmlAddTextElement(writer, QStringLiteral("jid"), m_jid);
     if (!m_resource.isEmpty())
-        helperToXmlAddTextElement(writer, "resource", m_resource);
+        helperToXmlAddTextElement(writer, QStringLiteral("resource"), m_resource);
     writer->writeEndElement();
 }
 /// \endcond

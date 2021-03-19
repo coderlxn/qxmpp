@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Jeremy Lainé
@@ -22,11 +22,12 @@
  *
  */
 
-#include <QDomDocument>
-#include <QtTest>
 #include "QXmppPasswordChecker.h"
 
-template <class T>
+#include <QDomDocument>
+#include <QtTest>
+
+template<class T>
 static void parsePacket(T &packet, const QByteArray &xml)
 {
     //qDebug() << "parsing" << xml;
@@ -36,7 +37,7 @@ static void parsePacket(T &packet, const QByteArray &xml)
     packet.parse(element);
 }
 
-template <class T>
+template<class T>
 static void serializePacket(T &packet, const QByteArray &xml)
 {
     QBuffer buffer;
@@ -48,6 +49,20 @@ static void serializePacket(T &packet, const QByteArray &xml)
     QCOMPARE(buffer.data(), xml);
 }
 
+template<class T>
+QDomElement writePacketToDom(T packet)
+{
+    QBuffer buffer;
+    buffer.open(QIODevice::ReadWrite);
+    QXmlStreamWriter writer(&buffer);
+    packet.toXml(&writer);
+
+    QDomDocument doc;
+    doc.setContent(buffer.data(), true);
+
+    return doc.documentElement();
+}
+
 class TestPasswordChecker : public QXmppPasswordChecker
 {
 public:
@@ -57,10 +72,9 @@ public:
     };
 
     /// Retrieves the password for the given username.
-    QXmppPasswordReply::Error getPassword(const QXmppPasswordRequest &request, QString &password)
+    QXmppPasswordReply::Error getPassword(const QXmppPasswordRequest &request, QString &password) override
     {
-        if (m_credentials.contains(request.username()))
-        {
+        if (m_credentials.contains(request.username())) {
             password = m_credentials.value(request.username());
             return QXmppPasswordReply::NoError;
         } else {
@@ -69,7 +83,7 @@ public:
     };
 
     /// Returns whether getPassword() is enabled.
-    bool hasGetPassword() const
+    bool hasGetPassword() const override
     {
         return true;
     };

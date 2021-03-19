@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -26,13 +26,24 @@
 
 #include "QXmppStanza.h"
 
+#include <QSharedDataPointer>
+
+class QXmppStreamFeaturesPrivate;
+
+///
+/// \brief The QXmppStreamFeatures class represents the features returned by an
+/// XMPP server or client.
+///
 class QXMPP_EXPORT QXmppStreamFeatures : public QXmppStanza
 {
 public:
     QXmppStreamFeatures();
+    QXmppStreamFeatures(const QXmppStreamFeatures &);
+    ~QXmppStreamFeatures();
 
-    enum Mode
-    {
+    QXmppStreamFeatures &operator=(const QXmppStreamFeatures &);
+
+    enum Mode {
         Disabled = 0,
         Enabled,
         Required
@@ -56,30 +67,30 @@ public:
     Mode tlsMode() const;
     void setTlsMode(Mode mode);
 
-    /// Returns the mode (disabled, enabled or required) for XEP-0198: Stream
-    /// Management
     Mode streamManagementMode() const;
-
-    /// Sets the mode for XEP-0198: Stream Management
-    ///
-    /// \pa mode The mode to set.
     void setStreamManagementMode(Mode mode);
 
+    Mode clientStateIndicationMode() const;
+    void setClientStateIndicationMode(Mode mode);
+
+    Mode registerMode() const;
+    void setRegisterMode(const Mode &registerMode);
+
+    bool preApprovedSubscriptionsSupported() const;
+    void setPreApprovedSubscriptionsSupported(bool);
+
+    bool rosterVersioningSupported() const;
+    void setRosterVersioningSupported(bool);
+
     /// \cond
-    void parse(const QDomElement &element);
-    void toXml(QXmlStreamWriter *writer) const;
+    void parse(const QDomElement &element) override;
+    void toXml(QXmlStreamWriter *writer) const override;
     /// \endcond
 
     static bool isStreamFeatures(const QDomElement &element);
 
 private:
-    Mode m_bindMode;
-    Mode m_sessionMode;
-    Mode m_nonSaslAuthMode;
-    Mode m_tlsMode;
-    Mode m_streamManagementMode;
-    QStringList m_authMechanisms;
-    QStringList m_compressionMethods;
+    QSharedDataPointer<QXmppStreamFeaturesPrivate> d;
 };
 
 #endif

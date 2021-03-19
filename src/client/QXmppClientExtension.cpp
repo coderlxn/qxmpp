@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,9 +21,9 @@
  *
  */
 
-#include <QStringList>
-
 #include "QXmppClientExtension.h"
+
+#include <QStringList>
 
 class QXmppClientExtensionPrivate
 {
@@ -37,7 +37,7 @@ public:
 QXmppClientExtension::QXmppClientExtension()
     : d(new QXmppClientExtensionPrivate)
 {
-    d->client = 0;
+    d->client = nullptr;
 }
 
 /// Destroys a QXmppClient extension.
@@ -80,4 +80,3 @@ void QXmppClientExtension::setClient(QXmppClient *client)
 {
     d->client = client;
 }
-

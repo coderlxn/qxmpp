@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,17 +24,21 @@
 #ifndef QXMPPELEMENT_H
 #define QXMPPELEMENT_H
 
+#include "QXmppGlobal.h"
+
 #include <QMap>
 #include <QStringList>
 #include <QXmlStreamWriter>
-
-#include "QXmppGlobal.h"
 
 class QDomElement;
 class QXmppElement;
 class QXmppElementPrivate;
 
-typedef QList<QXmppElement> QXmppElementList;
+using QXmppElementList = QList<QXmppElement>;
+
+///
+/// \brief QXmppElement represents a raw XML element with possible children.
+///
 class QXMPP_EXPORT QXmppElement
 {
 public:

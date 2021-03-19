@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -23,38 +23,40 @@
  *
  */
 
-
 #ifndef QXMPPSTANZA_H
 #define QXMPPSTANZA_H
 
 #include <QByteArray>
-#include <QString>
 #include <QSharedData>
+#include <QString>
 
 // forward declarations of QXmlStream* classes will not work on Mac, we need to
 // include the whole header.
 // See http://lists.trolltech.com/qt-interest/2008-07/thread00798-0.html
 // for an explanation.
-#include <QXmlStreamWriter>
-
 #include "QXmppElement.h"
+
+#include <QXmlStreamWriter>
 
 class QXmppExtendedAddressPrivate;
 
-/// \brief Represents an extended address as defined by XEP-0033: Extended Stanza Addressing.
 ///
-/// Extended addresses maybe of different types: some are defined by XEP-0033,
-/// others are defined in separate XEPs (for instance XEP-0146: Remote Controlling Clients).
-/// That is why the "type" property is a string rather than an enumerated type.
-
+/// \brief Represents an extended address as defined by \xep{0033}: Extended
+/// Stanza Addressing.
+///
+/// Extended addresses maybe of different types: some are defined by \xep{0033},
+/// others are defined in separate XEPs (for instance \xep{0146}: Remote
+/// Controlling Clients). That is why the "type" property is a string rather
+/// than an enumerated type.
+///
 class QXMPP_EXPORT QXmppExtendedAddress
 {
 public:
     QXmppExtendedAddress();
-    QXmppExtendedAddress(const QXmppExtendedAddress&);
+    QXmppExtendedAddress(const QXmppExtendedAddress &);
     ~QXmppExtendedAddress();
 
-    QXmppExtendedAddress& operator=(const QXmppExtendedAddress&);
+    QXmppExtendedAddress &operator=(const QXmppExtendedAddress &);
 
     QString description() const;
     void setDescription(const QString &description);
@@ -80,63 +82,85 @@ private:
 };
 
 class QXmppStanzaPrivate;
+class QXmppStanzaErrorPrivate;
 
-/// \defgroup Stanzas
+///
+/// \defgroup Stanzas Stanzas
+///
+/// All packets that are sent and received are serialized in Stanzas, so this
+/// includes IQ stanzas, message stanzas, presence stanzas and other stanzas.
+///
 
+///
 /// \brief The QXmppStanza class is the base class for all XMPP stanzas.
 ///
 /// \ingroup Stanzas
-
+///
 class QXMPP_EXPORT QXmppStanza
 {
 public:
+    ///
+    /// \brief The Error class represents a stanza error.
+    ///
     class QXMPP_EXPORT Error
     {
     public:
-        enum Type
-        {
-            Cancel,
-            Continue,
-            Modify,
-            Auth,
-            Wait
+        /// The type represents the error type of stanza errors.
+        ///
+        /// The error descriptions are not detailed in here. The exact meaning
+        /// can be found in the particular protocols using them.
+        enum Type {
+            Cancel,    ///< The error is not temporary.
+            Continue,  ///< The error was only a warning.
+            Modify,    ///< The request needs to be changed and resent.
+            Auth,      ///< The request needs to be resent after authentication.
+            Wait       ///< The error is temporary, you should wait and resend.
         };
 
-        enum Condition
-        {
-            BadRequest,
-            Conflict,
-            FeatureNotImplemented,
-            Forbidden,
-            Gone,
-            InternalServerError,
-            ItemNotFound,
-            JidMalformed,
-            NotAcceptable,
-            NotAllowed,
-            NotAuthorized,
-            PaymentRequired,
-            RecipientUnavailable,
-            Redirect,
-            RegistrationRequired,
-            RemoteServerNotFound,
-            RemoteServerTimeout,
-            ResourceConstraint,
-            ServiceUnavailable,
-            SubscriptionRequired,
-            UndefinedCondition,
-            UnexpectedRequest
+        /// A detailed condition of the error
+        enum Condition {
+            BadRequest,             ///< The request does not contain a valid schema.
+            Conflict,               ///< The request conflicts with another.
+            FeatureNotImplemented,  ///< The feature is not implemented.
+            Forbidden,              ///< The requesting entity does not posses the necessary privileges to perform the request.
+            Gone,                   ///< The user or server can not be contacted at the address. This is used in combination with a redirection URI.
+            InternalServerError,    ///< The server has expierienced an internal error and can not process the request.
+            ItemNotFound,           ///< The requested item could not be found.
+            JidMalformed,           ///< The given JID is not valid.
+            NotAcceptable,          ///< The request does not meet the defined critera.
+            NotAllowed,             ///< No entity is allowed to perform the request.
+            NotAuthorized,          ///< The request should be resent after authentication.
+#if QXMPP_DEPRECATED_SINCE(1, 3)
+            /// Payment is required to perform the request.
+            /// \deprecated This error condition is deprecated since QXmpp 1.3 as it was not adopted in RFC6120.
+            PaymentRequired Q_DECL_ENUMERATOR_DEPRECATED_X("The <payment-required/> error was removed in RFC6120"),
+#endif
+            RecipientUnavailable = 12,  ///< The recipient is unavailable.
+            Redirect,                   ///< The requested resource is available elsewhere. This is used in combination with a redirection URI.
+            RegistrationRequired,       ///< The requesting entity needs to register first.
+            RemoteServerNotFound,       ///< The remote server could not be found.
+            RemoteServerTimeout,        ///< The connection to the server could not be established or timed out.
+            ResourceConstraint,         ///< The recipient lacks system resources to perform the request.
+            ServiceUnavailable,         ///< The service is currently not available.
+            SubscriptionRequired,       ///< The requester needs to subscribe first.
+            UndefinedCondition,         ///< An undefined condition was hit.
+            UnexpectedRequest,          ///< The request was unexpected.
+            PolicyViolation             ///< The entity has violated a local server policy. \since QXmpp 1.3
         };
 
         Error();
-        Error(Type type, Condition cond, const QString& text = QString());
-        Error(const QString& type, const QString& cond, const QString& text = QString());
+        Error(const Error &);
+        Error(Type type, Condition cond, const QString &text = QString());
+        Error(const QString &type, const QString &cond, const QString &text = QString());
+        ~Error();
+
+        Error &operator=(const Error &);
 
         int code() const;
         void setCode(int code);
 
         QString text() const;
-        void setText(const QString& text);
+        void setText(const QString &text);
 
         Condition condition() const;
         void setCondition(Condition cond);
@@ -144,44 +168,51 @@ public:
         void setType(Type type);
         Type type() const;
 
+        QString by() const;
+        void setBy(const QString &by);
+
+        QString redirectionUri() const;
+        void setRedirectionUri(const QString &redirectionUri);
+
+        // XEP-0363: HTTP File Upload
+        bool fileTooLarge() const;
+        void setFileTooLarge(bool);
+
+        qint64 maxFileSize() const;
+        void setMaxFileSize(qint64);
+
+        QDateTime retryDate() const;
+        void setRetryDate(const QDateTime &);
+
         /// \cond
         void parse(const QDomElement &element);
         void toXml(QXmlStreamWriter *writer) const;
         /// \endcond
 
     private:
-        QString getConditionStr() const;
-        void setConditionFromStr(const QString& cond);
-
-        QString getTypeStr() const;
-        void setTypeFromStr(const QString& type);
-
-        int m_code;
-        Type m_type;
-        Condition m_condition;
-        QString m_text;
+        QSharedDataPointer<QXmppStanzaErrorPrivate> d;
     };
 
-    QXmppStanza(const QString& from = QString(), const QString& to = QString());
+    QXmppStanza(const QString &from = QString(), const QString &to = QString());
     QXmppStanza(const QXmppStanza &other);
     virtual ~QXmppStanza();
 
-    QXmppStanza& operator=(const QXmppStanza &other);
+    QXmppStanza &operator=(const QXmppStanza &other);
 
     QString to() const;
-    void setTo(const QString&);
+    void setTo(const QString &);
 
     QString from() const;
-    void setFrom(const QString&);
+    void setFrom(const QString &);
 
     QString id() const;
-    void setId(const QString&);
+    void setId(const QString &);
 
     QString lang() const;
-    void setLang(const QString&);
+    void setLang(const QString &);
 
     QXmppStanza::Error error() const;
-    void setError(const QXmppStanza::Error& error);
+    void setError(const QXmppStanza::Error &error);
 
     QXmppElementList extensions() const;
     void setExtensions(const QXmppElementList &elements);
@@ -205,4 +236,7 @@ private:
     static uint s_uniqeIdNo;
 };
 
-#endif // QXMPPSTANZA_H
+Q_DECLARE_METATYPE(QXmppStanza::Error::Type);
+Q_DECLARE_METATYPE(QXmppStanza::Error::Condition);
+
+#endif  // QXMPPSTANZA_H

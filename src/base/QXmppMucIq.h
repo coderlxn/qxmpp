@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -95,7 +95,7 @@ private:
 };
 
 /// \brief The QXmppMucAdminIq class represents a chat room administration IQ
-/// as defined by XEP-0045: Multi-User Chat.
+/// as defined by \xep{0045}: Multi-User Chat.
 ///
 /// It is used to get or modify room memberships.
 ///
@@ -113,8 +113,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -122,7 +122,7 @@ private:
 };
 
 /// \brief The QXmppMucOwnerIq class represents a chat room configuration IQ as
-/// defined by XEP-0045: Multi-User Chat.
+/// defined by \xep{0045}: Multi-User Chat.
 ///
 /// It is used to get or modify room configuration options.
 ///
@@ -141,8 +141,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:

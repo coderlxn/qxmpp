@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -26,6 +26,12 @@
 
 #include "QXmppIq.h"
 
+///
+/// \brief QXmppNonSASLAuthIq represents a Non-SASL authentication IQ as
+/// defined by \xep{0078}: Non-SASL Authentication.
+///
+/// \ingroup Stanzas
+///
 class QXMPP_EXPORT QXmppNonSASLAuthIq : public QXmppIq
 {
 public:
@@ -47,8 +53,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -58,4 +64,4 @@ private:
     QString m_resource;
 };
 
-#endif // QXmppNonSASLAuth_H
+#endif  // QXmppNonSASLAuth_H

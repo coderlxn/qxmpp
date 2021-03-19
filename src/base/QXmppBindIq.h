@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef QXMPPBINDIQ_H
 #define QXMPPBINDIQ_H
 
@@ -37,10 +36,10 @@ class QXMPP_EXPORT QXmppBindIq : public QXmppIq
 {
 public:
     QString jid() const;
-    void setJid(const QString&);
+    void setJid(const QString &);
 
     QString resource() const;
-    void setResource(const QString&);
+    void setResource(const QString &);
 
     /// \cond
     static bool isBindIq(const QDomElement &element);
@@ -48,8 +47,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -57,4 +56,4 @@ private:
     QString m_resource;
 };
 
-#endif // QXMPPBIND_H
+#endif  // QXMPPBIND_H

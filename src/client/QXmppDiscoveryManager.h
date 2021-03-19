@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -31,7 +31,7 @@ class QXmppDiscoveryIq;
 class QXmppDiscoveryManagerPrivate;
 
 /// \brief The QXmppDiscoveryManager class makes it possible to discover information
-/// about other entities as defined by XEP-0030: Service Discovery.
+/// about other entities as defined by \xep{0030}: Service Discovery.
 ///
 /// \ingroup Managers
 
@@ -41,7 +41,7 @@ class QXMPP_EXPORT QXmppDiscoveryManager : public QXmppClientExtension
 
 public:
     QXmppDiscoveryManager();
-    ~QXmppDiscoveryManager();
+    ~QXmppDiscoveryManager() override;
 
     QXmppDiscoveryIq capabilities();
 
@@ -62,14 +62,14 @@ public:
     void setClientType(const QString&);
 
     QXmppDataForm clientInfoForm() const;
-    void setClientInfoForm(const QXmppDataForm &form);
+    void setClientInfoForm(const QXmppDataForm& form);
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement& element) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when an information response is received.
     void infoReceived(const QXmppDiscoveryIq&);
 
@@ -77,7 +77,7 @@ signals:
     void itemsReceived(const QXmppDiscoveryIq&);
 
 private:
-    QXmppDiscoveryManagerPrivate *d;
+    QXmppDiscoveryManagerPrivate* d;
 };
 
-#endif // QXMPPDISCOVERYMANAGER_H
+#endif  // QXMPPDISCOVERYMANAGER_H

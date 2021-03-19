@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -22,34 +22,36 @@
  *
  */
 
-
 #ifndef QXMPPSTREAM_H
 #define QXMPPSTREAM_H
 
+#include "QXmppLogger.h"
+
 #include <QAbstractSocket>
 #include <QObject>
-#include "QXmppLogger.h"
 
 class QDomElement;
 class QSslSocket;
 class QXmppStanza;
 class QXmppStreamPrivate;
 
+///
 /// \brief The QXmppStream class is the base class for all XMPP streams.
 ///
-
 class QXMPP_EXPORT QXmppStream : public QXmppLoggable
 {
     Q_OBJECT
 
 public:
     QXmppStream(QObject *parent);
-    ~QXmppStream();
+    ~QXmppStream() override;
 
     virtual bool isConnected() const;
-    bool sendPacket(const QXmppStanza&);
+    bool sendPacket(const QXmppStanza &);
 
-signals:
+    void resetPacketCache();
+
+Q_SIGNALS:
     /// This signal is emitted when the stream is connected.
     void connected();
 
@@ -74,42 +76,27 @@ protected:
     /// \param element
     virtual void handleStream(const QDomElement &element) = 0;
 
-    /// Enables Stream Management acks / reqs (XEP-0198).
-    ///
-    /// \param resetSeqno Indicates if the sequence numbers should be resetted.
-    ///                   This must be done iff the stream is not resumed.
+    // XEP-0198: Stream Management
     void enableStreamManagement(bool resetSequenceNumber);
+    unsigned int lastIncomingSequenceNumber() const;
+    void setAcknowledgedSequenceNumber(unsigned int sequenceNumber);
 
-    /// Returns the sequence number of the last incoming stanza (XEP-0198).
-    unsigned lastIncomingSequenceNumber() const;
-
-    /// Sets the last acknowledged sequence number for outgoing stanzas (XEP-0198).
-    void setAcknowledgedSequenceNumber(unsigned sequenceNumber);
-
-private:
-    /// Handles an incoming acknowledgement from XEP-0198.
-    ///
-    /// \param element
-    void handleAcknowledgement(QDomElement &element);
-
-    /// Sends an acknowledgement as defined in XEP-0198.
-    void sendAcknowledgement();
-
-    /// Sends an acknowledgement request as defined in XEP-0198.
-    void sendAcknowledgementRequest();
-
-public slots:
+public Q_SLOTS:
     virtual void disconnectFromHost();
-    virtual bool sendData(const QByteArray&);
+    virtual bool sendData(const QByteArray &);
 
-private slots:
+private Q_SLOTS:
     void _q_socketConnected();
     void _q_socketEncrypted();
     void _q_socketError(QAbstractSocket::SocketError error);
     void _q_socketReadyRead();
 
 private:
-    QXmppStreamPrivate * const d;
+    void processData(const QString &data);
+
+    friend class tst_QXmppStream;
+
+    QXmppStreamPrivate *const d;
 };
 
-#endif // QXMPPSTREAM_H
+#endif  // QXMPPSTREAM_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Ian Reinhart Geiser
@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef IBBCLIENT_H
 #define IBBCLIENT_H
 
@@ -33,7 +32,7 @@ class xmppClient : public QXmppClient
     Q_OBJECT
 
 public:
-    xmppClient(QObject *parent = 0);
+    xmppClient(QObject *parent = nullptr);
     void setRecipient(const QString &recipient);
 
 private slots:
@@ -48,4 +47,4 @@ private:
     QXmppTransferManager *transferManager;
 };
 
-#endif // IBBCLIENT_H
+#endif  // IBBCLIENT_H

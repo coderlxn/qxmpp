@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,9 +21,10 @@
  *
  */
 
-#include <QObject>
 #include "QXmppStun.h"
+
 #include "util.h"
+#include <QObject>
 
 class tst_QXmppStunMessage : public QObject
 {

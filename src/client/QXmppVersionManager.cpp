@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,14 +21,16 @@
  *
  */
 
-#include <QCoreApplication>
-#include <QDomElement>
+#include "QXmppVersionManager.h"
 
 #include "QXmppClient.h"
 #include "QXmppConstants_p.h"
 #include "QXmppGlobal.h"
-#include "QXmppVersionManager.h"
 #include "QXmppVersionIq.h"
+
+#include <QCoreApplication>
+#include <QDomElement>
+#include <QSysInfo>
 
 class QXmppVersionManagerPrivate
 {
@@ -45,16 +47,7 @@ QXmppVersionManager::QXmppVersionManager()
     if (d->clientName.isEmpty())
         d->clientName = "Based on QXmpp";
 
-#if defined(Q_OS_LINUX)
-    d->clientOs = QString::fromLatin1("Linux");
-#elif defined(Q_OS_MAC)
-    d->clientOs = QString::fromLatin1("Mac OS");
-#elif defined(Q_OS_SYMBIAN)
-    d->clientOs = QString::fromLatin1("Symbian");
-#elif defined(Q_OS_WIN)
-    d->clientOs = QString::fromLatin1("Windows");
-#endif
-
+    d->clientOs = QSysInfo::prettyProductName();
     d->clientVersion = qApp->applicationVersion();
     if (d->clientVersion.isEmpty())
         d->clientVersion = QXmppVersion();
@@ -74,7 +67,7 @@ QString QXmppVersionManager::requestVersion(const QString& jid)
     QXmppVersionIq request;
     request.setType(QXmppIq::Get);
     request.setTo(jid);
-    if(client()->sendPacket(request))
+    if (client()->sendPacket(request))
         return request.id();
     else
         return QString();
@@ -129,8 +122,8 @@ QString QXmppVersionManager::clientVersion() const
 
 /// Returns the local XMPP client's operating system.
 ///
-/// By default this is "Linux", "Mac OS", "Symbian" or "Windows" depending
-/// on the platform QXmpp was compiled for.
+/// By default this equals to QSysInfo::prettyProductName() which contains the
+/// OS name and version (e.g. "Windows 8.1" or "Debian GNU/Linux buster").
 
 QString QXmppVersionManager::clientOs() const
 {
@@ -144,10 +137,9 @@ QStringList QXmppVersionManager::discoveryFeatures() const
     return QStringList() << ns_version;
 }
 
-bool QXmppVersionManager::handleStanza(const QDomElement &element)
+bool QXmppVersionManager::handleStanza(const QDomElement& element)
 {
-    if (element.tagName() == "iq" && QXmppVersionIq::isVersionIq(element))
-    {
+    if (element.tagName() == "iq" && QXmppVersionIq::isVersionIq(element)) {
         QXmppVersionIq versionIq;
         versionIq.parse(element);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Manjeet Dahiya
@@ -21,24 +21,28 @@
  *
  */
 
-
 #ifndef XMPPCLIENT_H
 #define XMPPCLIENT_H
 
 #include "QXmppClient.h"
+
+class QXmppRosterManager;
 
 class xmppClient : public QXmppClient
 {
     Q_OBJECT
 
 public:
-    xmppClient(QObject *parent = 0);
-    ~xmppClient();
+    xmppClient(QObject* parent = nullptr);
+    ~xmppClient() override;
 
 public slots:
     void clientConnected();
     void rosterReceived();
     void presenceChanged(const QString& bareJid, const QString& resource);
+
+private:
+    QXmppRosterManager* m_rosterManager;
 };
 
-#endif // XMPPCLIENT_H
+#endif  // XMPPCLIENT_H

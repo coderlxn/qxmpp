@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,9 +21,10 @@
  *
  */
 
-#include <QObject>
 #include "QXmppRpcIq.h"
+
 #include "util.h"
+#include <QObject>
 
 static void checkVariant(const QVariant &value, const QByteArray &xml)
 {
@@ -129,12 +130,12 @@ void tst_QXmppRpcIq::testStruct()
     checkVariant(map,
                  QByteArray("<value><struct>"
                             "<member>"
-                                "<name>bar</name>"
-                                "<value><string>hello world</string></value>"
+                            "<name>bar</name>"
+                            "<value><string>hello world</string></value>"
                             "</member>"
                             "<member>"
-                                "<name>foo</name>"
-                                "<value><double>-12.214</double></value>"
+                            "<name>foo</name>"
+                            "<value><double>-12.214</double></value>"
                             "</member>"
                             "</struct></value>"));
 }
@@ -205,16 +206,16 @@ void tst_QXmppRpcIq::testResponseFault()
         "<methodResponse>"
         "<fault>"
         "<value>"
-            "<struct>"
-                "<member>"
-                    "<name>faultCode</name>"
-                    "<value><i4>404</i4></value>"
-                "</member>"
-                "<member>"
-                    "<name>faultString</name>"
-                    "<value><string>Not found</string></value>"
-                "</member>"
-            "</struct>"
+        "<struct>"
+        "<member>"
+        "<name>faultCode</name>"
+        "<value><i4>404</i4></value>"
+        "</member>"
+        "<member>"
+        "<name>faultString</name>"
+        "<value><string>Not found</string></value>"
+        "</member>"
+        "</struct>"
         "</value>"
         "</fault>"
         "</methodResponse>"

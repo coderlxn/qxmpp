@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,10 +24,10 @@
 #ifndef QXMPPSOCKS_H
 #define QXMPPSOCKS_H
 
+#include "QXmppGlobal.h"
+
 #include <QHostAddress>
 #include <QTcpSocket>
-
-#include "QXmppGlobal.h"
 
 class QTcpServer;
 
@@ -36,13 +36,13 @@ class QXMPP_EXPORT QXmppSocksClient : public QTcpSocket
     Q_OBJECT
 
 public:
-    QXmppSocksClient(const QString &proxyHost, quint16 proxyPort, QObject *parent=0);
+    QXmppSocksClient(const QString &proxyHost, quint16 proxyPort, QObject *parent = nullptr);
     void connectToHost(const QString &hostName, quint16 hostPort);
 
-signals:
+Q_SIGNALS:
     void ready();
 
-private slots:
+private Q_SLOTS:
     void slotConnected();
     void slotReadyRead();
 
@@ -59,23 +59,23 @@ class QXMPP_EXPORT QXmppSocksServer : public QObject
     Q_OBJECT
 
 public:
-    QXmppSocksServer(QObject *parent=0);
+    QXmppSocksServer(QObject *parent = nullptr);
     void close();
     bool listen(quint16 port = 0);
 
     quint16 serverPort() const;
 
-signals:
+Q_SIGNALS:
     void newConnection(QTcpSocket *socket, QString hostName, quint16 port);
 
-private slots:
+private Q_SLOTS:
     void slotNewConnection();
     void slotReadyRead();
 
 private:
     QTcpServer *m_server;
     QTcpServer *m_server_v6;
-    QMap<QTcpSocket*, int> m_states;
+    QMap<QTcpSocket *, int> m_states;
 };
 
 #endif

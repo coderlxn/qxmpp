@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Jeremy Lainé
@@ -21,11 +21,12 @@
  *
  */
 
-#include <QDomElement>
+#include "QXmppDialback.h"
 
 #include "QXmppConstants_p.h"
-#include "QXmppDialback.h"
 #include "QXmppUtils.h"
+
+#include <QDomElement>
 
 /// Constructs a QXmppDialback.
 
@@ -86,8 +87,8 @@ void QXmppDialback::setType(const QString &type)
 bool QXmppDialback::isDialback(const QDomElement &element)
 {
     return element.namespaceURI() == ns_server_dialback &&
-           (element.tagName() == QLatin1String("result") ||
-           element.tagName() == QLatin1String("verify"));
+        (element.tagName() == QLatin1String("result") ||
+         element.tagName() == QLatin1String("verify"));
 }
 
 void QXmppDialback::parse(const QDomElement &element)

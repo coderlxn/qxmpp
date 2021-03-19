@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef QXMPPENTITYTIMEMANAGER_H
 #define QXMPPENTITYTIMEMANAGER_H
 
@@ -30,7 +29,7 @@
 class QXmppEntityTimeIq;
 
 /// \brief The QXmppEntityTimeManager class provided the functionality to get
-/// the local time of an entity as defined by XEP-0202: Entity Time.
+/// the local time of an entity as defined by \xep{0202}: Entity Time.
 ///
 /// \ingroup Managers
 
@@ -42,13 +41,13 @@ public:
     QString requestTime(const QString& jid);
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement& element) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// \brief This signal is emitted when a time response is received.
     void timeReceived(const QXmppEntityTimeIq&);
 };
 
-#endif // QXMPPENTITYTIMEMANAGER_H
+#endif  // QXMPPENTITYTIMEMANAGER_H

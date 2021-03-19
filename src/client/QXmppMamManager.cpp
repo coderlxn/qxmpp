@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Niels Ole Salscheider
@@ -21,15 +21,16 @@
  *
  */
 
-#include <QDomElement>
-
 #include "QXmppMamManager.h"
-#include "QXmppMamIq.h"
+
 #include "QXmppClient.h"
 #include "QXmppConstants_p.h"
 #include "QXmppDataForm.h"
+#include "QXmppMamIq.h"
 #include "QXmppMessage.h"
 #include "QXmppUtils.h"
+
+#include <QDomElement>
 
 /// \cond
 QStringList QXmppMamManager::discoveryFeatures() const

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef QXMPPCARBONMANAGER_H
 #define QXMPPCARBONMANAGER_H
 
@@ -29,43 +28,39 @@
 
 class QXmppMessage;
 
+///
 /// \brief The QXmppCarbonManager class handles message carbons
-/// as described in XEP-0280: Message Carbons.
+/// as described in \xep{0280}: Message Carbons.
 ///
 /// This class emits signals whenever another resource of the
 /// currently connected client account sent or received a message.
 ///
 /// \ingroup Managers
-
+///
+/// \since QXmpp 1.0
+///
 class QXMPP_EXPORT QXmppCarbonManager : public QXmppClientExtension
 {
     Q_OBJECT
 
 public:
     QXmppCarbonManager();
-    ~QXmppCarbonManager();
+    ~QXmppCarbonManager() override;
 
     bool carbonsEnabled() const;
     void setCarbonsEnabled(bool enabled);
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement &element) override;
     /// \endcond
 
-signals:
-    /// \brief Emitted when a message was received from someone else
-    /// and directed to another resource.
-    /// If you connect this signal to the \s QXmppClient::messageReceived
-    /// signal, they will appear as normal messages.
-    void messageReceived(const QXmppMessage&);
-
-    /// \brief Emitted when another resource sent a message to
-    /// someone else
-    void messageSent(const QXmppMessage&);
+Q_SIGNALS:
+    void messageReceived(const QXmppMessage &);
+    void messageSent(const QXmppMessage &);
 
 private:
     bool m_carbonsEnabled;
 };
 
-#endif // QXMPPCARBONMANAGER_H
+#endif  // QXMPPCARBONMANAGER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Jeremy Lainé
@@ -21,15 +21,13 @@
  *
  */
 
-#include <QBuffer>
-#include <QObject>
-
 #include "QXmppClient.h"
 #include "QXmppServer.h"
 #include "QXmppTransferManager.h"
-#include "util.h"
 
-Q_DECLARE_METATYPE(QXmppTransferJob::Method)
+#include "util.h"
+#include <QBuffer>
+#include <QObject>
 
 class tst_QXmppTransferManager : public QObject
 {
@@ -51,7 +49,7 @@ void tst_QXmppTransferManager::init()
 {
     receiverBuffer.close();
     receiverBuffer.setData(QByteArray());
-    receiverJob = 0;
+    receiverJob = nullptr;
 }
 
 void tst_QXmppTransferManager::acceptFile(QXmppTransferJob *job)
@@ -106,14 +104,14 @@ void tst_QXmppTransferManager::testSendFile()
 
     // prepare sender
     QXmppClient sender;
-    QXmppTransferManager *senderManager = new QXmppTransferManager;
+    auto *senderManager = new QXmppTransferManager;
     senderManager->setSupportedMethods(senderMethods);
     sender.addExtension(senderManager);
     sender.setLogger(&logger);
 
     QEventLoop senderLoop;
-    connect(&sender, SIGNAL(connected()), &senderLoop, SLOT(quit()));
-    connect(&sender, SIGNAL(disconnected()), &senderLoop, SLOT(quit()));
+    connect(&sender, &QXmppClient::connected, &senderLoop, &QEventLoop::quit);
+    connect(&sender, &QXmppClient::disconnected, &senderLoop, &QEventLoop::quit);
 
     QXmppConfiguration config;
     config.setDomain(testDomain);
@@ -127,16 +125,16 @@ void tst_QXmppTransferManager::testSendFile()
 
     // prepare receiver
     QXmppClient receiver;
-    QXmppTransferManager *receiverManager = new QXmppTransferManager;
+    auto *receiverManager = new QXmppTransferManager;
     receiverManager->setSupportedMethods(receiverMethods);
-    connect(receiverManager, SIGNAL(fileReceived(QXmppTransferJob*)),
-            this, SLOT(acceptFile(QXmppTransferJob*)));
+    connect(receiverManager, &QXmppTransferManager::fileReceived,
+            this, &tst_QXmppTransferManager::acceptFile);
     receiver.addExtension(receiverManager);
     receiver.setLogger(&logger);
 
     QEventLoop receiverLoop;
-    connect(&receiver, SIGNAL(connected()), &receiverLoop, SLOT(quit()));
-    connect(&receiver, SIGNAL(disconnected()), &receiverLoop, SLOT(quit()));
+    connect(&receiver, &QXmppClient::connected, &receiverLoop, &QEventLoop::quit);
+    connect(&receiver, &QXmppClient::disconnected, &receiverLoop, &QEventLoop::quit);
 
     config.setUser("receiver");
     config.setPassword("testpwd");
@@ -149,7 +147,7 @@ void tst_QXmppTransferManager::testSendFile()
     QXmppTransferJob *senderJob = senderManager->sendFile("receiver@localhost/QXmpp", ":/test.svg");
     QVERIFY(senderJob);
     QCOMPARE(senderJob->localFileUrl(), QUrl::fromLocalFile(":/test.svg"));
-    connect(senderJob, SIGNAL(finished()), &loop, SLOT(quit()));
+    connect(senderJob, &QXmppTransferJob::finished, &loop, &QEventLoop::quit);
     loop.exec();
 
     if (works) {
@@ -158,7 +156,7 @@ void tst_QXmppTransferManager::testSendFile()
 
         // finish receiving file
         QVERIFY(receiverJob);
-        connect(receiverJob, SIGNAL(finished()), &loop, SLOT(quit()));
+        connect(receiverJob, &QXmppTransferJob::finished, &loop, &QEventLoop::quit);
         loop.exec();
 
         QCOMPARE(receiverJob->state(), QXmppTransferJob::FinishedState);

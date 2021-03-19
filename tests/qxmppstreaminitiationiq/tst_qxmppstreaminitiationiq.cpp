@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Olivier Goffart
@@ -24,6 +24,7 @@
 
 #include "QXmppStreamInitiationIq_p.h"
 #include "QXmppTransferManager.h"
+
 #include "util.h"
 
 class tst_QXmppStreamInitiationIq : public QObject
@@ -48,7 +49,7 @@ void tst_QXmppStreamInitiationIq::testFileInfo_data()
 
     QTest::newRow("normal")
         << QByteArray("<file xmlns=\"http://jabber.org/protocol/si/profile/file-transfer\" name=\"test.txt\" size=\"1022\"/>")
-        << QDateTime()
+        << QDateTime().toUTC()
         << QString()
         << QByteArray()
         << QString("test.txt")
@@ -56,12 +57,12 @@ void tst_QXmppStreamInitiationIq::testFileInfo_data()
 
     QTest::newRow("full")
         << QByteArray("<file xmlns=\"http://jabber.org/protocol/si/profile/file-transfer\" "
-            "date=\"1969-07-21T02:56:15Z\" "
-            "hash=\"552da749930852c69ae5d2141d3766b1\" "
-            "name=\"test.txt\" "
-            "size=\"1022\">"
-                "<desc>This is a test. If this were a real file...</desc>"
-            "</file>")
+                      "date=\"1969-07-21T02:56:15Z\" "
+                      "hash=\"552da749930852c69ae5d2141d3766b1\" "
+                      "name=\"test.txt\" "
+                      "size=\"1022\">"
+                      "<desc>This is a test. If this were a real file...</desc>"
+                      "</file>")
         << QDateTime(QDate(1969, 7, 21), QTime(2, 56, 15), Qt::UTC)
         << QString("This is a test. If this were a real file...")
         << QByteArray::fromHex("552da749930852c69ae5d2141d3766b1")
@@ -92,17 +93,17 @@ void tst_QXmppStreamInitiationIq::testOffer()
 {
     QByteArray xml(
         "<iq id=\"offer1\" to=\"receiver@jabber.org/resource\" type=\"set\">"
-          "<si xmlns=\"http://jabber.org/protocol/si\" id=\"a0\" mime-type=\"text/plain\" profile=\"http://jabber.org/protocol/si/profile/file-transfer\">"
-            "<file xmlns=\"http://jabber.org/protocol/si/profile/file-transfer\" name=\"test.txt\" size=\"1022\"/>"
-            "<feature xmlns=\"http://jabber.org/protocol/feature-neg\">"
-              "<x xmlns=\"jabber:x:data\" type=\"form\">"
-                "<field type=\"list-single\" var=\"stream-method\">"
-                  "<option><value>http://jabber.org/protocol/bytestreams</value></option>"
-                  "<option><value>http://jabber.org/protocol/ibb</value></option>"
-                "</field>"
-              "</x>"
-            "</feature>"
-          "</si>"
+        "<si xmlns=\"http://jabber.org/protocol/si\" id=\"a0\" mime-type=\"text/plain\" profile=\"http://jabber.org/protocol/si/profile/file-transfer\">"
+        "<file xmlns=\"http://jabber.org/protocol/si/profile/file-transfer\" name=\"test.txt\" size=\"1022\"/>"
+        "<feature xmlns=\"http://jabber.org/protocol/feature-neg\">"
+        "<x xmlns=\"jabber:x:data\" type=\"form\">"
+        "<field type=\"list-single\" var=\"stream-method\">"
+        "<option><value>http://jabber.org/protocol/bytestreams</value></option>"
+        "<option><value>http://jabber.org/protocol/ibb</value></option>"
+        "</field>"
+        "</x>"
+        "</feature>"
+        "</si>"
         "</iq>");
 
     QXmppStreamInitiationIq iq;
@@ -117,15 +118,15 @@ void tst_QXmppStreamInitiationIq::testResult()
 {
     QByteArray xml(
         "<iq id=\"offer1\" to=\"sender@jabber.org/resource\" type=\"result\">"
-          "<si xmlns=\"http://jabber.org/protocol/si\">"
-            "<feature xmlns=\"http://jabber.org/protocol/feature-neg\">"
-              "<x xmlns=\"jabber:x:data\" type=\"submit\">"
-                "<field type=\"list-single\" var=\"stream-method\">"
-                  "<value>http://jabber.org/protocol/bytestreams</value>"
-                "</field>"
-              "</x>"
-            "</feature>"
-          "</si>"
+        "<si xmlns=\"http://jabber.org/protocol/si\">"
+        "<feature xmlns=\"http://jabber.org/protocol/feature-neg\">"
+        "<x xmlns=\"jabber:x:data\" type=\"submit\">"
+        "<field type=\"list-single\" var=\"stream-method\">"
+        "<value>http://jabber.org/protocol/bytestreams</value>"
+        "</field>"
+        "</x>"
+        "</feature>"
+        "</si>"
         "</iq>");
 
     QXmppStreamInitiationIq iq;

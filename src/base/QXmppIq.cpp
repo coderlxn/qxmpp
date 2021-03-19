@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,14 +21,14 @@
  *
  */
 
+#include "QXmppIq.h"
 
 #include "QXmppUtils.h"
-#include "QXmppIq.h"
 
 #include <QDomElement>
 #include <QXmlStreamWriter>
 
-static const char* iq_types[] = {
+static const char *iq_types[] = {
     "error",
     "get",
     "set",
@@ -46,8 +46,7 @@ public:
 /// \param type
 
 QXmppIq::QXmppIq(QXmppIq::Type type)
-    : QXmppStanza()
-    , d(new QXmppIqPrivate)
+    : QXmppStanza(), d(new QXmppIqPrivate)
 {
     d->type = type;
     generateAndSetNextId();
@@ -56,8 +55,7 @@ QXmppIq::QXmppIq(QXmppIq::Type type)
 /// Constructs a copy of \a other.
 
 QXmppIq::QXmppIq(const QXmppIq &other)
-    : QXmppStanza(other)
-    , d(other.d)
+    : QXmppStanza(other), d(other.d)
 {
 }
 
@@ -67,7 +65,7 @@ QXmppIq::~QXmppIq()
 
 /// Assigns \a other to this IQ.
 
-QXmppIq& QXmppIq::operator=(const QXmppIq &other)
+QXmppIq &QXmppIq::operator=(const QXmppIq &other)
 {
     QXmppStanza::operator=(other);
     d = other.d;
@@ -91,9 +89,12 @@ void QXmppIq::setType(QXmppIq::Type type)
     d->type = type;
 }
 
-/// Indicates if the QXmppStanza is a stanza in the XMPP sence (i. e. a message,
+///
+/// Indicates if the QXmppStanza is a stanza in the XMPP sense (i. e. a message,
 /// iq or presence)
-
+///
+/// \since QXmpp 1.0
+///
 bool QXmppIq::isXmppStanza() const
 {
     return true;
@@ -119,15 +120,14 @@ void QXmppIq::parseElementFromChild(const QDomElement &element)
 {
     QXmppElementList extensions;
     QDomElement itemElement = element.firstChildElement();
-    while (!itemElement.isNull())
-    {
+    while (!itemElement.isNull()) {
         extensions.append(QXmppElement(itemElement));
         itemElement = itemElement.nextSiblingElement();
     }
     setExtensions(extensions);
 }
 
-void QXmppIq::toXml( QXmlStreamWriter *xmlWriter ) const
+void QXmppIq::toXml(QXmlStreamWriter *xmlWriter) const
 {
     xmlWriter->writeStartElement("iq");
 
@@ -140,9 +140,9 @@ void QXmppIq::toXml( QXmlStreamWriter *xmlWriter ) const
     xmlWriter->writeEndElement();
 }
 
-void QXmppIq::toXmlElementFromChild( QXmlStreamWriter *writer ) const
+void QXmppIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    foreach (const QXmppElement &extension, extensions())
+    for (const QXmppElement &extension : extensions())
         extension.toXml(writer);
 }
 /// \endcond

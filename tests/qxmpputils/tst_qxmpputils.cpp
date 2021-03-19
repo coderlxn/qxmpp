@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Jeremy Lainé
@@ -22,9 +22,10 @@
  *
  */
 
-#include <QObject>
 #include "QXmppUtils.h"
+
 #include "util.h"
+#include <QObject>
 
 class tst_QXmppUtils : public QObject
 {
@@ -36,6 +37,7 @@ private slots:
     void testJid();
     void testMime();
     void testTimezoneOffset();
+    void testStanzaHash();
 };
 
 void tst_QXmppUtils::testCrc32()
@@ -124,6 +126,22 @@ void tst_QXmppUtils::testTimezoneOffset()
     QCOMPARE(QXmppUtils::timezoneOffsetToString(0), QLatin1String("Z"));
     QCOMPARE(QXmppUtils::timezoneOffsetToString(5400), QLatin1String("+01:30"));
     QCOMPARE(QXmppUtils::timezoneOffsetToString(-5400), QLatin1String("-01:30"));
+}
+
+void tst_QXmppUtils::testStanzaHash()
+{
+    for (int i = 0; i < 100; i++) {
+        const QString hash = QXmppUtils::generateStanzaHash(i);
+        QCOMPARE(hash.size(), i);
+
+        if (i == 36) {
+            QCOMPARE(hash.count('-'), 4);
+        }
+    }
+
+    const QString hash = QXmppUtils::generateStanzaUuid();
+    QCOMPARE(hash.size(), 36);
+    QCOMPARE(hash.count('-'), 4);
 }
 
 QTEST_MAIN(tst_QXmppUtils)

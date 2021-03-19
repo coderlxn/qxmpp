@@ -1,8 +1,9 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
+ *  Linus Jahn
  *
  * Source:
  *  https://github.com/qxmpp-project/qxmpp
@@ -21,15 +22,17 @@
  *
  */
 
-
 #ifndef QXMPPREGISTERIQ_H
 #define QXMPPREGISTERIQ_H
 
 #include "QXmppDataForm.h"
 #include "QXmppIq.h"
 
+class QXmppBitsOfBinaryDataList;
+class QXmppRegisterIqPrivate;
+
 /// \brief The QXmppRegisterIq class represents a registration IQ
-/// as defined by XEP-0077: In-Band Registration.
+/// as defined by \xep{0077}: In-Band Registration.
 ///
 /// It is used to create an account on the server.
 ///
@@ -38,6 +41,15 @@
 class QXMPP_EXPORT QXmppRegisterIq : public QXmppIq
 {
 public:
+    QXmppRegisterIq();
+    QXmppRegisterIq(const QXmppRegisterIq &other);
+    ~QXmppRegisterIq();
+
+    QXmppRegisterIq &operator=(const QXmppRegisterIq &other);
+
+    static QXmppRegisterIq createChangePasswordRequest(const QString &username, const QString &newPassword, const QString &to = {});
+    static QXmppRegisterIq createUnregistrationRequest(const QString &to = {});
+
     QString email() const;
     void setEmail(const QString &email);
 
@@ -53,22 +65,28 @@ public:
     QString username() const;
     void setUsername(const QString &username);
 
+    bool isRegistered() const;
+    void setIsRegistered(bool isRegistered);
+
+    bool isRemove() const;
+    void setIsRemove(bool isRemove);
+
+    QXmppBitsOfBinaryDataList bitsOfBinaryData() const;
+    QXmppBitsOfBinaryDataList &bitsOfBinaryData();
+    void setBitsOfBinaryData(const QXmppBitsOfBinaryDataList &bitsOfBinaryData);
+
     /// \cond
     static bool isRegisterIq(const QDomElement &element);
     /// \endcond
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
-    QXmppDataForm m_form;
-    QString m_email;
-    QString m_instructions;
-    QString m_password;
-    QString m_username;
+    QSharedDataPointer<QXmppRegisterIqPrivate> d;
 };
 
 #endif

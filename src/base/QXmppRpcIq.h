@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Ian Reinhart Geiser
@@ -26,17 +26,18 @@
 #define QXMPPRPCIQ_H
 
 #include "QXmppIq.h"
+
 #include <QVariant>
 
 class QXMPP_EXPORT QXmppRpcMarshaller
 {
 public:
-    static void marshall( QXmlStreamWriter *writer, const QVariant &value);
+    static void marshall(QXmlStreamWriter *writer, const QVariant &value);
     static QVariant demarshall(const QDomElement &elem, QStringList &errors);
 };
 
 /// \brief The QXmppRpcResponseIq class represents an IQ used to carry
-/// an RPC response as specified by XEP-0009: Jabber-RPC.
+/// an RPC response as specified by \xep{0009}: Jabber-RPC.
 ///
 /// \ingroup Stanzas
 
@@ -60,8 +61,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -71,7 +72,7 @@ private:
 };
 
 /// \brief The QXmppRpcInvokeIq class represents an IQ used to carry
-/// an RPC invocation as specified by XEP-0009: Jabber-RPC.
+/// an RPC invocation as specified by \xep{0009}: Jabber-RPC.
 ///
 /// \ingroup Stanzas
 
@@ -81,7 +82,7 @@ public:
     QXmppRpcInvokeIq();
 
     QString method() const;
-    void setMethod( const QString &method );
+    void setMethod(const QString &method);
 
     QVariantList arguments() const;
     void setArguments(const QVariantList &arguments);
@@ -92,8 +93,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -117,12 +118,12 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
     QXmppRpcInvokeIq m_query;
 };
 
-#endif // QXMPPRPCIQ_H
+#endif  // QXMPPRPCIQ_H

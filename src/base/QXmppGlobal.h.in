@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2008-2017 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
  *  Niels Ole Salscheider
+ *  Linus Jahn
  *
  * Source:
  *  https://github.com/qxmpp-project/qxmpp
@@ -28,10 +29,16 @@
 
 #include <QString>
 
-#if defined(QXMPP_BUILD)
-#    define QXMPP_EXPORT Q_DECL_EXPORT
+#define QXMPP_BUILD_SHARED @QXMPP_BUILD_SHARED@
+
+#if QXMPP_BUILD_SHARED
+#    if defined(QXMPP_BUILD)
+#         define QXMPP_EXPORT Q_DECL_EXPORT
+#    else
+#         define QXMPP_EXPORT Q_DECL_IMPORT
+#    endif
 #else
-#    define QXMPP_EXPORT Q_DECL_IMPORT
+#    define QXMPP_EXPORT
 #endif
 
 #define QXMPP_AUTOTEST_EXPORT
@@ -45,12 +52,30 @@
 /// available.
 ///
 
-#define QXMPP_VERSION (0x@VERSION_MAJOR@ << 16) | (0x@VERSION_MINOR@ << 8) | 0x@VERSION_PATCH@
+#define QXMPP_VERSION QT_VERSION_CHECK(@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@)
 
 inline QLatin1String QXmppVersion()
 {
-    return QLatin1String("@VERSION_STRING@");
+    return QLatin1String("@PROJECT_VERSION@");
 }
 
-#endif //QXMPPGLOBAL_H
+// This sets which deprecated functions should still be usable
+// It works exactly like QT_DISABLE_DEPRECATED_BEFORE
+#ifndef QXMPP_DISABLE_DEPRECATED_BEFORE
+#   define QXMPP_DISABLE_DEPRECATED_BEFORE 0x0
+#endif
+
+// This works exactly like QT_DEPRECATED_SINCE, but checks QXMPP_DISABLE_DEPRECATED_BEFORE instead.
+#define QXMPP_DEPRECATED_SINCE(major, minor) (QT_VERSION_CHECK(major, minor, 0) > QXMPP_DISABLE_DEPRECATED_BEFORE)
+
+// workaround for Qt < 5.12
+#ifndef Q_DECL_ENUMERATOR_DEPRECATED_X
+#define Q_DECL_ENUMERATOR_DEPRECATED_X(msg)
+#endif
+
+#ifndef QT_WARNING_DISABLE_DEPRECATED
+#define QT_WARNING_DISABLE_DEPRECATED
+#endif
+
+#endif // QXMPPGLOBAL_H
 

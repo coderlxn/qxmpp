@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *	Ian Reinhart Geiser
@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef RPCCLIENT_H
 #define RPCCLIENT_H
 
@@ -35,8 +34,8 @@ class rpcClient : public QXmppClient
     Q_OBJECT
 
 public:
-    rpcClient(QObject *parent = 0);
-    ~rpcClient();
+    rpcClient(QObject *parent = nullptr);
+    ~rpcClient() override;
 
 private slots:
     void slotInvokeRemoteMethod();
@@ -47,4 +46,4 @@ private:
     QXmppRpcManager *m_rpcManager;
 };
 
-#endif // RPCCLIENT_H
+#endif  // RPCCLIENT_H

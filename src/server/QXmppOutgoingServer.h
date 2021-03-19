@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,9 +24,9 @@
 #ifndef QXMPPOUTGOINGSERVER_H
 #define QXMPPOUTGOINGSERVER_H
 
-#include <QAbstractSocket>
-
 #include "QXmppStream.h"
+
+#include <QAbstractSocket>
 
 class QSslError;
 class QXmppDialback;
@@ -43,9 +43,9 @@ class QXMPP_EXPORT QXmppOutgoingServer : public QXmppStream
 
 public:
     QXmppOutgoingServer(const QString &domain, QObject *parent);
-    ~QXmppOutgoingServer();
+    ~QXmppOutgoingServer() override;
 
-    bool isConnected() const;
+    bool isConnected() const override;
 
     QString localStreamKey() const;
     void setLocalStreamKey(const QString &key);
@@ -53,22 +53,22 @@ public:
 
     QString remoteDomain() const;
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when a dialback verify response is received.
     void dialbackResponseReceived(const QXmppDialback &response);
 
 protected:
     /// \cond
-    void handleStart();
-    void handleStream(const QDomElement &streamElement);
-    void handleStanza(const QDomElement &stanzaElement);
+    void handleStart() override;
+    void handleStream(const QDomElement &streamElement) override;
+    void handleStanza(const QDomElement &stanzaElement) override;
     /// \endcond
 
-public slots:
+public Q_SLOTS:
     void connectToHost(const QString &domain);
     void queueData(const QByteArray &data);
 
-private slots:
+private Q_SLOTS:
     void _q_dnsLookupFinished();
     void _q_socketDisconnected();
     void sendDialback();
@@ -77,7 +77,7 @@ private slots:
 
 private:
     Q_DISABLE_COPY(QXmppOutgoingServer)
-    QXmppOutgoingServerPrivate* const d;
+    QXmppOutgoingServerPrivate *const d;
 };
 
 #endif

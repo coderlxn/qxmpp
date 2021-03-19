@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,11 +21,7 @@
  *
  */
 
-#include <QDomElement>
-#include <QHostAddress>
-#include <QSslKey>
-#include <QSslSocket>
-#include <QTimer>
+#include "QXmppIncomingClient.h"
 
 #include "QXmppBindIq.h"
 #include "QXmppConstants_p.h"
@@ -33,10 +29,15 @@
 #include "QXmppPasswordChecker.h"
 #include "QXmppSasl_p.h"
 #include "QXmppSessionIq.h"
+#include "QXmppStartTlsPacket.h"
 #include "QXmppStreamFeatures.h"
 #include "QXmppUtils.h"
 
-#include "QXmppIncomingClient.h"
+#include <QDomElement>
+#include <QHostAddress>
+#include <QSslKey>
+#include <QSslSocket>
+#include <QTimer>
 
 class QXmppIncomingClientPrivate
 {
@@ -58,10 +59,7 @@ private:
 };
 
 QXmppIncomingClientPrivate::QXmppIncomingClientPrivate(QXmppIncomingClient *qq)
-    : idleTimer(0)
-    , passwordChecker(0)
-    , saslServer(0)
-    , q(qq)
+    : idleTimer(nullptr), passwordChecker(nullptr), saslServer(nullptr), q(qq)
 {
 }
 
@@ -77,14 +75,14 @@ void QXmppIncomingClientPrivate::checkCredentials(const QByteArray &response)
         QXmppPasswordReply *reply = passwordChecker->checkPassword(request);
         reply->setParent(q);
         reply->setProperty("__sasl_raw", response);
-        QObject::connect(reply, SIGNAL(finished()),
-                         q, SLOT(onPasswordReply()));
+        QObject::connect(reply, &QXmppPasswordReply::finished,
+                         q, &QXmppIncomingClient::onPasswordReply);
     } else if (saslServer->mechanism() == "DIGEST-MD5") {
         QXmppPasswordReply *reply = passwordChecker->getDigest(request);
         reply->setParent(q);
         reply->setProperty("__sasl_raw", response);
-        QObject::connect(reply, SIGNAL(finished()),
-                         q, SLOT(onDigestReply()));
+        QObject::connect(reply, &QXmppPasswordReply::finished,
+                         q, &QXmppIncomingClient::onDigestReply);
     }
 }
 
@@ -107,16 +105,13 @@ QString QXmppIncomingClientPrivate::origin() const
 QXmppIncomingClient::QXmppIncomingClient(QSslSocket *socket, const QString &domain, QObject *parent)
     : QXmppStream(parent)
 {
-    bool check;
-    Q_UNUSED(check);
 
     d = new QXmppIncomingClientPrivate(this);
     d->domain = domain;
 
     if (socket) {
-        check = connect(socket, SIGNAL(disconnected()),
-                        this, SLOT(onSocketDisconnected()));
-        Q_ASSERT(check);
+        connect(socket, &QAbstractSocket::disconnected,
+                this, &QXmppIncomingClient::onSocketDisconnected);
 
         setSocket(socket);
     }
@@ -126,9 +121,8 @@ QXmppIncomingClient::QXmppIncomingClient(QSslSocket *socket, const QString &doma
     // create inactivity timer
     d->idleTimer = new QTimer(this);
     d->idleTimer->setSingleShot(true);
-    check = connect(d->idleTimer, SIGNAL(timeout()),
-                    this, SLOT(onTimeout()));
-    Q_ASSERT(check);
+    connect(d->idleTimer, &QTimer::timeout,
+            this, &QXmppIncomingClient::onTimeout);
 }
 
 /// Destroys the current stream.
@@ -146,8 +140,8 @@ QXmppIncomingClient::~QXmppIncomingClient()
 bool QXmppIncomingClient::isConnected() const
 {
     return QXmppStream::isConnected() &&
-           !d->jid.isEmpty() &&
-           !d->resource.isEmpty();
+        !d->jid.isEmpty() &&
+        !d->resource.isEmpty();
 }
 
 /// Returns the client's JID.
@@ -184,31 +178,32 @@ void QXmppIncomingClient::handleStream(const QDomElement &streamElement)
 {
     if (d->idleTimer->interval())
         d->idleTimer->start();
-    if (d->saslServer != 0) {
+    if (d->saslServer != nullptr) {
         delete d->saslServer;
-        d->saslServer = 0;
+        d->saslServer = nullptr;
     }
 
     // start stream
     const QByteArray sessionId = QXmppUtils::generateStanzaHash().toLatin1();
     QString response = QString("<?xml version='1.0'?><stream:stream"
-        " xmlns=\"%1\" xmlns:stream=\"%2\""
-        " id=\"%3\" from=\"%4\" version=\"1.0\" xml:lang=\"en\">").arg(
-        ns_client,
-        ns_stream,
-        sessionId,
-        d->domain.toLatin1());
+                               " xmlns=\"%1\" xmlns:stream=\"%2\""
+                               " id=\"%3\" from=\"%4\" version=\"1.0\" xml:lang=\"en\">")
+                           .arg(
+                               ns_client,
+                               ns_stream,
+                               sessionId,
+                               d->domain.toLatin1());
     sendData(response.toUtf8());
 
     // check requested domain
-    if (streamElement.attribute("to") != d->domain)
-    {
+    if (streamElement.attribute("to") != d->domain) {
         QString response = QString("<stream:error>"
-            "<host-unknown xmlns=\"urn:ietf:params:xml:ns:xmpp-streams\"/>"
-            "<text xmlns=\"urn:ietf:params:xml:ns:xmpp-streams\">"
-                "This server does not serve %1"
-            "</text>"
-            "</stream:error>").arg(streamElement.attribute("to"));
+                                   "<host-unknown xmlns=\"urn:ietf:params:xml:ns:xmpp-streams\"/>"
+                                   "<text xmlns=\"urn:ietf:params:xml:ns:xmpp-streams\">"
+                                   "This server does not serve %1"
+                                   "</text>"
+                                   "</stream:error>")
+                               .arg(streamElement.attribute("to"));
         sendData(response.toUtf8());
         disconnectFromHost();
         return;
@@ -218,13 +213,10 @@ void QXmppIncomingClient::handleStream(const QDomElement &streamElement)
     QXmppStreamFeatures features;
     if (socket() && !socket()->isEncrypted() && !socket()->localCertificate().isNull() && !socket()->privateKey().isNull())
         features.setTlsMode(QXmppStreamFeatures::Enabled);
-    if (!d->jid.isEmpty())
-    {
+    if (!d->jid.isEmpty()) {
         features.setBindMode(QXmppStreamFeatures::Required);
         features.setSessionMode(QXmppStreamFeatures::Enabled);
-    }
-    else if (d->passwordChecker)
-    {
+    } else if (d->passwordChecker) {
         QStringList mechanisms;
         mechanisms << "PLAIN";
         if (d->passwordChecker->hasGetPassword())
@@ -241,15 +233,12 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
     if (d->idleTimer->interval())
         d->idleTimer->start();
 
-    if (ns == ns_tls && nodeRecv.tagName() == QLatin1String("starttls"))
-    {
-        sendData("<proceed xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>");
+    if (QXmppStartTlsPacket::isStartTlsPacket(nodeRecv, QXmppStartTlsPacket::StartTls)) {
+        sendPacket(QXmppStartTlsPacket(QXmppStartTlsPacket::Proceed));
         socket()->flush();
         socket()->startServerEncryption();
         return;
-    }
-    else if (ns == ns_sasl)
-    {
+    } else if (ns == ns_sasl) {
         if (!d->passwordChecker) {
             warning("Cannot perform authentication, no password checker");
             sendPacket(QXmppSaslFailure("temporary-auth-failure"));
@@ -284,9 +273,7 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
                 disconnectFromHost();
                 return;
             }
-        }
-        else if (nodeRecv.tagName() == QLatin1String("response"))
-        {
+        } else if (nodeRecv.tagName() == QLatin1String("response")) {
             QXmppSaslResponse response;
             response.parse(nodeRecv);
 
@@ -315,14 +302,10 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
                 disconnectFromHost();
             }
         }
-    }
-    else if (ns == ns_client)
-    {
-        if (nodeRecv.tagName() == QLatin1String("iq"))
-        {
+    } else if (ns == ns_client) {
+        if (nodeRecv.tagName() == QLatin1String("iq")) {
             const QString type = nodeRecv.attribute("type");
-            if (QXmppBindIq::isBindIq(nodeRecv) && type == QLatin1String("set"))
-            {
+            if (QXmppBindIq::isBindIq(nodeRecv) && type == QLatin1String("set")) {
                 QXmppBindIq bindSet;
                 bindSet.parse(nodeRecv);
                 d->resource = bindSet.resource().trimmed();
@@ -339,9 +322,7 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
                 // bound
                 emit connected();
                 return;
-            }
-            else if (QXmppSessionIq::isSessionIq(nodeRecv) && type == QLatin1String("set"))
-            {
+            } else if (QXmppSessionIq::isSessionIq(nodeRecv) && type == QLatin1String("set")) {
                 QXmppSessionIq sessionSet;
                 sessionSet.parse(nodeRecv);
 
@@ -356,8 +337,7 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
 
         // check the sender is legitimate
         const QString from = nodeRecv.attribute("from");
-        if (!from.isEmpty() && from != d->jid && from != QXmppUtils::jidToBareJid(d->jid))
-        {
+        if (!from.isEmpty() && from != d->jid && from != QXmppUtils::jidToBareJid(d->jid)) {
             warning(QString("Received a stanza from unexpected JID %1").arg(from));
             return;
         }
@@ -365,16 +345,14 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
         // process unhandled stanzas
         if (nodeRecv.tagName() == QLatin1String("iq") ||
             nodeRecv.tagName() == QLatin1String("message") ||
-            nodeRecv.tagName() == QLatin1String("presence"))
-        {
+            nodeRecv.tagName() == QLatin1String("presence")) {
             QDomElement nodeFull(nodeRecv);
 
             // if the sender is empty, set it to the appropriate JID
-            if (nodeFull.attribute("from").isEmpty())
-            {
+            if (nodeFull.attribute("from").isEmpty()) {
                 if (nodeFull.tagName() == QLatin1String("presence") &&
                     (nodeFull.attribute("type") == QLatin1String("subscribe") ||
-                    nodeFull.attribute("type") == QLatin1String("subscribed")))
+                     nodeFull.attribute("type") == QLatin1String("subscribed")))
                     nodeFull.setAttribute("from", QXmppUtils::jidToBareJid(d->jid));
                 else
                     nodeFull.setAttribute("from", d->jid);
@@ -393,7 +371,7 @@ void QXmppIncomingClient::handleStanza(const QDomElement &nodeRecv)
 
 void QXmppIncomingClient::onDigestReply()
 {
-    QXmppPasswordReply *reply = qobject_cast<QXmppPasswordReply*>(sender());
+    auto *reply = qobject_cast<QXmppPasswordReply *>(sender());
     if (!reply)
         return;
     reply->deleteLater();
@@ -424,7 +402,7 @@ void QXmppIncomingClient::onDigestReply()
 
 void QXmppIncomingClient::onPasswordReply()
 {
-    QXmppPasswordReply *reply = qobject_cast<QXmppPasswordReply*>(sender());
+    auto *reply = qobject_cast<QXmppPasswordReply *>(sender());
     if (!reply)
         return;
     reply->deleteLater();
@@ -465,7 +443,5 @@ void QXmppIncomingClient::onTimeout()
     disconnectFromHost();
 
     // make sure disconnected() gets emitted no matter what
-    QTimer::singleShot(30, this, SIGNAL(disconnected()));
+    QTimer::singleShot(30, this, &QXmppStream::disconnected);
 }
-
-

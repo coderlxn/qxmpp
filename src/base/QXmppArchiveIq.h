@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -30,7 +30,7 @@
 #include <QDateTime>
 
 /// \brief The QXmppArchiveMessage class represents an archived message
-/// as defined by XEP-0136: Message Archiving.
+/// as defined by \xep{0136}: Message Archiving.
 
 class QXMPP_EXPORT QXmppArchiveMessage
 {
@@ -53,7 +53,7 @@ private:
 };
 
 /// \brief The QXmppArchiveChat class represents an archived conversation
-/// as defined by XEP-0136: Message Archiving.
+/// as defined by \xep{0136}: Message Archiving.
 
 class QXMPP_EXPORT QXmppArchiveChat
 {
@@ -92,7 +92,7 @@ private:
     QString m_with;
 };
 
-/// \brief Represents an archive chat as defined by XEP-0136: Message Archiving.
+/// \brief Represents an archive chat as defined by \xep{0136}: Message Archiving.
 ///
 /// It is used to get chat as a QXmppArchiveChat.
 ///
@@ -111,8 +111,8 @@ public:
     static bool isArchiveChatIq(const QDomElement &element);
 
 protected:
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -120,7 +120,7 @@ private:
     QXmppResultSetReply m_rsmReply;
 };
 
-/// \brief Represents an archive list as defined by XEP-0136: Message Archiving.
+/// \brief Represents an archive list as defined by \xep{0136}: Message Archiving.
 ///
 /// \ingroup Stanzas
 
@@ -133,13 +133,13 @@ public:
     void setChats(const QList<QXmppArchiveChat> &chats);
 
     QString with() const;
-    void setWith( const QString &with );
+    void setWith(const QString &with);
 
     QDateTime start() const;
-    void setStart(const QDateTime &start );
+    void setStart(const QDateTime &start);
 
     QDateTime end() const;
-    void setEnd(const QDateTime &end );
+    void setEnd(const QDateTime &end);
 
     QXmppResultSetQuery resultSetQuery() const;
     void setResultSetQuery(const QXmppResultSetQuery &rsm);
@@ -153,8 +153,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -166,7 +166,7 @@ private:
     QXmppResultSetReply m_rsmReply;
 };
 
-/// \brief Represents an archive remove IQ as defined by XEP-0136: Message Archiving.
+/// \brief Represents an archive remove IQ as defined by \xep{0136}: Message Archiving.
 ///
 /// \ingroup Stanzas
 
@@ -174,20 +174,20 @@ class QXMPP_EXPORT QXmppArchiveRemoveIq : public QXmppIq
 {
 public:
     QString with() const;
-    void setWith( const QString &with );
+    void setWith(const QString &with);
 
     QDateTime start() const;
-    void setStart(const QDateTime &start );
+    void setStart(const QDateTime &start);
 
     QDateTime end() const;
-    void setEnd(const QDateTime &end );
+    void setEnd(const QDateTime &end);
 
     /// \cond
     static bool isArchiveRemoveIq(const QDomElement &element);
 
 protected:
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -196,7 +196,7 @@ private:
     QDateTime m_end;
 };
 
-/// \brief Represents an archive retrieve IQ as defined by XEP-0136: Message Archiving.
+/// \brief Represents an archive retrieve IQ as defined by \xep{0136}: Message Archiving.
 ///
 /// \ingroup Stanzas
 
@@ -218,8 +218,8 @@ public:
     static bool isArchiveRetrieveIq(const QDomElement &element);
 
 protected:
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -228,7 +228,7 @@ private:
     QXmppResultSetQuery m_rsmQuery;
 };
 
-/// \brief Represents an archive preference IQ as defined by XEP-0136: Message Archiving.
+/// \brief Represents an archive preference IQ as defined by \xep{0136}: Message Archiving.
 ///
 /// \ingroup Stanzas
 
@@ -239,9 +239,9 @@ public:
     static bool isArchivePrefIq(const QDomElement &element);
 
 protected:
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 };
 
-#endif // QXMPPARCHIVEIQ_H
+#endif  // QXMPPARCHIVEIQ_H

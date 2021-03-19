@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,9 +21,10 @@
  *
  */
 
-#include <QHostInfo>
 #include "QXmppStun.h"
+
 #include "util.h"
+#include <QHostInfo>
 
 class tst_QXmppIceConnection : public QObject
 {
@@ -43,8 +44,8 @@ void tst_QXmppIceConnection::testBind()
     logger.setLoggingType(QXmppLogger::StdoutLogging);
 
     QXmppIceConnection client;
-    connect(&client, SIGNAL(logMessage(QXmppLogger::MessageType,QString)),
-            &logger, SLOT(log(QXmppLogger::MessageType,QString)));
+    connect(&client, &QXmppLoggable::logMessage,
+            &logger, &QXmppLogger::log);
     client.setIceControlling(true);
     client.addComponent(componentId);
 
@@ -56,7 +57,8 @@ void tst_QXmppIceConnection::testBind()
     QCOMPARE(client.gatheringState(), QXmppIceConnection::CompleteGatheringState);
     QCOMPARE(client.localCandidates().size(), component->localCandidates().size());
     QVERIFY(!client.localCandidates().isEmpty());
-    foreach (const QXmppJingleCandidate &c, client.localCandidates()) {
+    const auto &localCandidates = client.localCandidates();
+    for (const auto &c : localCandidates) {
         QCOMPARE(c.component(), componentId);
         QCOMPARE(c.type(), QXmppJingleCandidate::HostType);
     }
@@ -73,10 +75,14 @@ void tst_QXmppIceConnection::testBindStun()
     QVERIFY(!stunInfo.addresses().isEmpty());
 
     QXmppIceConnection client;
-    connect(&client, SIGNAL(logMessage(QXmppLogger::MessageType,QString)),
-            &logger, SLOT(log(QXmppLogger::MessageType,QString)));
+    connect(&client, &QXmppLoggable::logMessage,
+            &logger, &QXmppLogger::log);
     client.setIceControlling(true);
-    client.setStunServer(stunInfo.addresses().first(), 19302);
+    QList<QPair<QHostAddress, quint16>> stunServers;
+    for (auto &address : stunInfo.addresses()) {
+        stunServers.push_back({address, 19302});
+    }
+    client.setStunServers(stunServers);
     client.addComponent(componentId);
 
     QXmppIceComponent *component = client.component(componentId);
@@ -87,15 +93,16 @@ void tst_QXmppIceConnection::testBindStun()
     QCOMPARE(client.gatheringState(), QXmppIceConnection::BusyGatheringState);
 
     QEventLoop loop;
-    connect(&client, SIGNAL(gatheringStateChanged()),
-            &loop, SLOT(quit()));
+    connect(&client, &QXmppIceConnection::gatheringStateChanged,
+            &loop, &QEventLoop::quit);
     loop.exec();
 
     bool foundReflexive = false;
     QCOMPARE(client.gatheringState(), QXmppIceConnection::CompleteGatheringState);
     QCOMPARE(client.localCandidates().size(), component->localCandidates().size());
     QVERIFY(!client.localCandidates().isEmpty());
-    foreach (const QXmppJingleCandidate &c, client.localCandidates()) {
+    const auto &localCandidates = client.localCandidates();
+    for (const auto &c : localCandidates) {
         QCOMPARE(c.component(), componentId);
         if (c.type() == QXmppJingleCandidate::ServerReflexiveType)
             foundReflexive = true;
@@ -113,15 +120,15 @@ void tst_QXmppIceConnection::testConnect()
     logger.setLoggingType(QXmppLogger::StdoutLogging);
 
     QXmppIceConnection clientL;
-    connect(&clientL, SIGNAL(logMessage(QXmppLogger::MessageType,QString)),
-            &logger, SLOT(log(QXmppLogger::MessageType,QString)));
+    connect(&clientL, &QXmppLoggable::logMessage,
+            &logger, &QXmppLogger::log);
     clientL.setIceControlling(true);
     clientL.addComponent(componentId);
     clientL.bind(QXmppIceComponent::discoverAddresses());
 
     QXmppIceConnection clientR;
-    connect(&clientR, SIGNAL(logMessage(QXmppLogger::MessageType,QString)),
-            &logger, SLOT(log(QXmppLogger::MessageType,QString)));
+    connect(&clientR, &QXmppLoggable::logMessage,
+            &logger, &QXmppLogger::log);
     clientR.setIceControlling(false);
     clientR.addComponent(componentId);
     clientR.bind(QXmppIceComponent::discoverAddresses());
@@ -133,15 +140,17 @@ void tst_QXmppIceConnection::testConnect()
     clientR.setRemotePassword(clientL.localPassword());
 
     // exchange candidates
-    foreach (const QXmppJingleCandidate &candidate, clientR.localCandidates())
+    const auto &rLocalCandidates = clientR.localCandidates();
+    for (const auto &candidate : rLocalCandidates)
         clientL.addRemoteCandidate(candidate);
-    foreach (const QXmppJingleCandidate &candidate, clientL.localCandidates())
+    const auto &lLocalCandidates = clientL.localCandidates();
+    for (const auto &candidate : lLocalCandidates)
         clientR.addRemoteCandidate(candidate);
 
     // start ICE
     QEventLoop loop;
-    connect(&clientL, SIGNAL(connected()), &loop, SLOT(quit()));
-    connect(&clientR, SIGNAL(connected()), &loop, SLOT(quit()));
+    connect(&clientL, &QXmppIceConnection::connected, &loop, &QEventLoop::quit);
+    connect(&clientR, &QXmppIceConnection::connected, &loop, &QEventLoop::quit);
 
     clientL.connectToHost();
     clientR.connectToHost();

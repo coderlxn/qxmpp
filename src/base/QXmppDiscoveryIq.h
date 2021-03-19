@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -27,12 +27,36 @@
 #include "QXmppDataForm.h"
 #include "QXmppIq.h"
 
+#include <QSharedDataPointer>
+
+class QXmppDiscoveryIdentityPrivate;
+class QXmppDiscoveryItemPrivate;
+class QXmppDiscoveryIqPrivate;
+
+///
+/// \brief QXmppDiscoveryIq represents a discovery IQ request or result
+/// containing a list of features and other information about an entity as
+/// defined by \xep{0030}: Service Discovery.
+///
+/// \ingroup Stanzas
+///
 class QXMPP_EXPORT QXmppDiscoveryIq : public QXmppIq
 {
 public:
+    ///
+    /// \brief Identity represents one of possibly multiple identities of an
+    /// XMPP entity obtained from a service discovery request as defined in
+    /// \xep{0030}: Service Discovery.
+    ///
     class QXMPP_EXPORT Identity
     {
     public:
+        Identity();
+        Identity(const Identity &other);
+        ~Identity();
+
+        Identity &operator=(const Identity &other);
+
         QString category() const;
         void setCategory(const QString &category);
 
@@ -46,15 +70,22 @@ public:
         void setType(const QString &type);
 
     private:
-        QString m_category;
-        QString m_language;
-        QString m_name;
-        QString m_type;
+        QSharedDataPointer<QXmppDiscoveryIdentityPrivate> d;
     };
 
+    ///
+    /// \brief Item represents a related XMPP entity that can be queried using
+    /// \xep{0030}: Service Discovery.
+    ///
     class QXMPP_EXPORT Item
     {
     public:
+        Item();
+        Item(const Item &);
+        ~Item();
+
+        Item &operator=(const Item &);
+
         QString jid() const;
         void setJid(const QString &jid);
 
@@ -65,10 +96,14 @@ public:
         void setNode(const QString &node);
 
     private:
-        QString m_jid;
-        QString m_name;
-        QString m_node;
+        QSharedDataPointer<QXmppDiscoveryItemPrivate> d;
     };
+
+    QXmppDiscoveryIq();
+    QXmppDiscoveryIq(const QXmppDiscoveryIq &);
+    ~QXmppDiscoveryIq();
+
+    QXmppDiscoveryIq &operator=(const QXmppDiscoveryIq &);
 
     enum QueryType {
         InfoQuery,
@@ -99,17 +134,12 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
-    QStringList m_features;
-    QList<QXmppDiscoveryIq::Identity> m_identities;
-    QList<QXmppDiscoveryIq::Item> m_items;
-    QXmppDataForm m_form;
-    QString m_queryNode;
-    enum QueryType m_queryType;
+    QSharedDataPointer<QXmppDiscoveryIqPrivate> d;
 };
 
 #endif

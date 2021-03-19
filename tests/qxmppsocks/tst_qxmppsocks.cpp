@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,10 +21,11 @@
  *
  */
 
+#include "QXmppSocks.h"
+
+#include "util.h"
 #include <QTcpServer>
 #include <QTcpSocket>
-#include "QXmppSocks.h"
-#include "util.h"
 
 class tst_QXmppSocks : public QObject
 {
@@ -48,7 +49,7 @@ private:
 
 void tst_QXmppSocks::init()
 {
-    m_connectionSocket = 0;
+    m_connectionSocket = nullptr;
     m_connectionHostName = QString();
     m_connectionPort = 0;
 }
@@ -102,7 +103,7 @@ void tst_QXmppSocks::testClient()
     QXmppSocksClient client("127.0.0.1", server.serverPort());
 
     QEventLoop loop;
-    connect(&server, SIGNAL(newConnection()), &loop, SLOT(quit()));
+    connect(&server, &QTcpServer::newConnection, &loop, &QEventLoop::quit);
 
     client.connectToHost("www.google.com", 80);
     loop.exec();
@@ -111,8 +112,8 @@ void tst_QXmppSocks::testClient()
     m_connectionSocket = server.nextPendingConnection();
     QVERIFY(m_connectionSocket);
 
-    connect(m_connectionSocket, SIGNAL(disconnected()), &loop, SLOT(quit()));
-    connect(m_connectionSocket, SIGNAL(readyRead()), &loop, SLOT(quit()));
+    connect(m_connectionSocket, &QAbstractSocket::disconnected, &loop, &QEventLoop::quit);
+    connect(m_connectionSocket, &QIODevice::readyRead, &loop, &QEventLoop::quit);
     loop.exec();
     QCOMPARE(client.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(m_connectionSocket->state(), QAbstractSocket::ConnectedState);
@@ -132,10 +133,10 @@ void tst_QXmppSocks::testClient()
     QCOMPARE(m_connectionSocket->readAll(), QByteArray::fromHex("050100030e7777772e676f6f676c652e636f6d0050"));
 
     // wait for client to be ready
-    connect(&client, SIGNAL(ready()), &loop, SLOT(quit()));
+    connect(&client, &QXmppSocksClient::ready, &loop, &QEventLoop::quit);
     m_connectionSocket->write(serverConnect);
     loop.exec();
-    if  (!serverConnectWorks) {
+    if (!serverConnectWorks) {
         QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
         QCOMPARE(m_connectionSocket->state(), QAbstractSocket::UnconnectedState);
         return;
@@ -155,14 +156,14 @@ void tst_QXmppSocks::testClientAndServer()
     QXmppSocksServer server;
     QVERIFY(server.listen());
     QVERIFY(server.serverPort() != 0);
-    connect(&server, SIGNAL(newConnection(QTcpSocket*,QString,quint16)),
-            this, SLOT(newConnectionSlot(QTcpSocket*,QString,quint16)));
+    connect(&server, &QXmppSocksServer::newConnection,
+            this, &tst_QXmppSocks::newConnectionSlot);
 
     QXmppSocksClient client("127.0.0.1", server.serverPort());
 
     QEventLoop loop;
-    connect(&client, SIGNAL(ready()), &loop, SLOT(quit()));
-  
+    connect(&client, &QXmppSocksClient::ready, &loop, &QEventLoop::quit);
+
     client.connectToHost("www.google.com", 80);
     loop.exec();
 
@@ -217,16 +218,16 @@ void tst_QXmppSocks::testServer()
     QXmppSocksServer server;
     QVERIFY(server.listen());
     QVERIFY(server.serverPort() != 0);
-    connect(&server, SIGNAL(newConnection(QTcpSocket*,QString,quint16)),
-            this, SLOT(newConnectionSlot(QTcpSocket*,QString,quint16)));
+    connect(&server, &QXmppSocksServer::newConnection,
+            this, &tst_QXmppSocks::newConnectionSlot);
 
     QTcpSocket client;
     client.connectToHost(QHostAddress::LocalHost, server.serverPort());
     QVERIFY2(client.waitForConnected(), qPrintable(client.errorString()));
 
     QEventLoop loop;
-    connect(&client, SIGNAL(disconnected()), &loop, SLOT(quit()));
-    connect(&client, SIGNAL(readyRead()), &loop, SLOT(quit()));
+    connect(&client, &QAbstractSocket::disconnected, &loop, &QEventLoop::quit);
+    connect(&client, &QIODevice::readyRead, &loop, &QEventLoop::quit);
 
     // send client handshake
     client.write(clientHandshake);

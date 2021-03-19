@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,9 +24,9 @@
 #ifndef QXMPPSERVERPLUGIN_H
 #define QXMPPSERVERPLUGIN_H
 
-#include <QtPlugin>
-
 #include "QXmppGlobal.h"
+
+#include <QtPlugin>
 
 class QXmppServer;
 class QXmppServerExtension;
@@ -55,11 +55,11 @@ public:
     /// Creates and returns the specified QXmppServerExtension.
     ///
     /// \param key The key for the QXmppServerExtension.
-    virtual QXmppServerExtension *create(const QString &key) = 0;
+    QXmppServerExtension *create(const QString &key) override = 0;
 
     /// Returns the list of keys supported by this plugin.
     ///
-    virtual QStringList keys() const = 0;
+    QStringList keys() const override = 0;
 };
 
 #endif

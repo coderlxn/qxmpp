@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,8 +21,9 @@
  *
  */
 
-#include "QXmppConstants_p.h"
 #include "QXmppPingIq.h"
+
+#include "QXmppConstants_p.h"
 #include "QXmppUtils.h"
 
 #include <QDomElement>
@@ -33,15 +34,14 @@ QXmppPingIq::QXmppPingIq() : QXmppIq(QXmppIq::Get)
 
 bool QXmppPingIq::isPingIq(const QDomElement &element)
 {
-    QDomElement pingElement = element.firstChildElement("ping");
-    return (element.attribute("type") == "get" &&
+    QDomElement pingElement = element.firstChildElement(QStringLiteral("ping"));
+    return (element.attribute(QStringLiteral("type")) == QStringLiteral("get") &&
             pingElement.namespaceURI() == ns_ping);
 }
 
 void QXmppPingIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("ping");
-    writer->writeAttribute("xmlns", ns_ping);
+    writer->writeStartElement(QStringLiteral("ping"));
+    writer->writeDefaultNamespace(ns_ping);
     writer->writeEndElement();
 }
-

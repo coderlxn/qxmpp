@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,9 +24,9 @@
 #ifndef QXMPPPASSWORDCHECKER_H
 #define QXMPPPASSWORDCHECKER_H
 
-#include <QObject>
-
 #include "QXmppGlobal.h"
+
+#include <QObject>
 
 /// \brief The QXmppPasswordRequest class represents a password request.
 ///
@@ -67,7 +67,7 @@ public:
         TemporaryError
     };
 
-    QXmppPasswordReply(QObject *parent = 0);
+    QXmppPasswordReply(QObject *parent = nullptr);
 
     QByteArray digest() const;
     void setDigest(const QByteArray &digest);
@@ -80,11 +80,11 @@ public:
 
     bool isFinished() const;
 
-public slots:
+public Q_SLOTS:
     void finish();
     void finishLater();
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when the reply has finished.
     void finished();
 

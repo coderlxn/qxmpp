@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,10 +24,10 @@
 #ifndef QXMPPSERVER_H
 #define QXMPPSERVER_H
 
+#include "QXmppLogger.h"
+
 #include <QTcpServer>
 #include <QVariantMap>
-
-#include "QXmppLogger.h"
 
 class QDomElement;
 class QSslCertificate;
@@ -59,18 +59,21 @@ class QXmppStream;
 class QXMPP_EXPORT QXmppServer : public QXmppLoggable
 {
     Q_OBJECT
-    Q_PROPERTY(QXmppLogger* logger READ logger WRITE setLogger NOTIFY loggerChanged)
+    /// The QXmppLogger associated with the server
+    Q_PROPERTY(QXmppLogger *logger READ logger WRITE setLogger NOTIFY loggerChanged)
 
 public:
-    QXmppServer(QObject *parent = 0);
-    ~QXmppServer();
+    QXmppServer(QObject *parent = nullptr);
+    ~QXmppServer() override;
 
     void addExtension(QXmppServerExtension *extension);
-    QList<QXmppServerExtension*> extensions();
+    QList<QXmppServerExtension *> extensions();
 
     QString domain() const;
     void setDomain(const QString &domain);
 
+    // documentation needs to be here, see https://stackoverflow.com/questions/49192523/
+    /// Returns the QXmppLogger associated with the server.
     QXmppLogger *logger();
     void setLogger(QXmppLogger *logger);
 
@@ -94,7 +97,7 @@ public:
 
     void addIncomingClient(QXmppIncomingClient *stream);
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when a client has connected.
     void clientConnected(const QString &jid);
 
@@ -104,10 +107,10 @@ signals:
     /// This signal is emitted when the logger changes.
     void loggerChanged(QXmppLogger *logger);
 
-public slots:
+public Q_SLOTS:
     void handleElement(const QDomElement &element);
 
-private slots:
+private Q_SLOTS:
     void _q_clientConnection(QSslSocket *socket);
     void _q_clientConnected();
     void _q_clientDisconnected();
@@ -131,20 +134,20 @@ class QXMPP_EXPORT QXmppSslServer : public QTcpServer
     Q_OBJECT
 
 public:
-    QXmppSslServer(QObject *parent = 0);
-    ~QXmppSslServer();
+    QXmppSslServer(QObject *parent = nullptr);
+    ~QXmppSslServer() override;
 
     void addCaCertificates(const QList<QSslCertificate> &certificates);
     void setLocalCertificate(const QSslCertificate &certificate);
     void setPrivateKey(const QSslKey &key);
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when a new connection is established.
     void newConnection(QSslSocket *socket);
 
 private:
     void incomingConnection(qintptr socketDescriptor) override;
-    QXmppSslServerPrivate * const d;
+    QXmppSslServerPrivate *const d;
 };
 
 #endif

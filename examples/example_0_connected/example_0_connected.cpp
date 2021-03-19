@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Manjeet Dahiya
@@ -21,11 +21,10 @@
  *
  */
 
-
-#include <QCoreApplication>
-
 #include "QXmppClient.h"
 #include "QXmppLogger.h"
+
+#include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {

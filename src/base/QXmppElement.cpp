@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -22,6 +22,7 @@
  */
 
 #include "QXmppElement.h"
+
 #include "QXmppUtils.h"
 
 #include <QDomElement>
@@ -38,7 +39,7 @@ public:
 
     QXmppElementPrivate *parent;
     QMap<QString, QString> attributes;
-    QList<QXmppElementPrivate*> children;
+    QList<QXmppElementPrivate *> children;
     QString name;
     QString value;
 
@@ -46,12 +47,12 @@ public:
 };
 
 QXmppElementPrivate::QXmppElementPrivate()
-    : counter(1), parent(NULL)
+    : counter(1), parent(nullptr)
 {
 }
 
 QXmppElementPrivate::QXmppElementPrivate(const QDomElement &element)
-    : counter(1), parent(NULL)
+    : counter(1), parent(nullptr)
 {
     if (element.isNull())
         return;
@@ -62,17 +63,14 @@ QXmppElementPrivate::QXmppElementPrivate(const QDomElement &element)
     if (!xmlns.isEmpty() && xmlns != parentns)
         attributes.insert("xmlns", xmlns);
     QDomNamedNodeMap attrs = element.attributes();
-    for (int i = 0; i < attrs.size(); i++)
-    {
+    for (int i = 0; i < attrs.size(); i++) {
         QDomAttr attr = attrs.item(i).toAttr();
         attributes.insert(attr.name(), attr.value());
     }
 
     QDomNode childNode = element.firstChild();
-    while (!childNode.isNull())
-    {
-        if (childNode.isElement())
-        {
+    while (!childNode.isNull()) {
+        if (childNode.isElement()) {
             QXmppElementPrivate *child = new QXmppElementPrivate(childNode.toElement());
             child->parent = this;
             children.append(child);
@@ -88,7 +86,7 @@ QXmppElementPrivate::QXmppElementPrivate(const QDomElement &element)
 
 QXmppElementPrivate::~QXmppElementPrivate()
 {
-    foreach (QXmppElementPrivate *child, children)
+    for (auto *child : children)
         if (!child->counter.deref())
             delete child;
 }
@@ -123,7 +121,7 @@ QXmppElement::~QXmppElement()
 
 QXmppElement &QXmppElement::operator=(const QXmppElement &other)
 {
-    if (this != &other) // self-assignment check
+    if (this != &other)  // self-assignment check
     {
         other.d->counter.ref();
         if (!d->counter.deref())
@@ -139,8 +137,7 @@ QDomElement QXmppElement::sourceDomElement() const
         return QDomElement();
 
     QDomDocument doc;
-    if (!doc.setContent(d->serializedSource, true))
-    {
+    if (!doc.setContent(d->serializedSource, true)) {
         qWarning("[QXmpp] QXmppElement::sourceDomElement(): cannot parse source element");
         return QDomElement();
     }
@@ -178,7 +175,7 @@ void QXmppElement::appendChild(const QXmppElement &child)
 
 QXmppElement QXmppElement::firstChildElement(const QString &name) const
 {
-    foreach (QXmppElementPrivate *child_d, d->children)
+    for (auto *child_d : d->children)
         if (name.isEmpty() || child_d->name == name)
             return QXmppElement(child_d);
     return QXmppElement();
@@ -188,7 +185,7 @@ QXmppElement QXmppElement::nextSiblingElement(const QString &name) const
 {
     if (!d->parent)
         return QXmppElement();
-    const QList<QXmppElementPrivate*> &siblings_d = d->parent->children;
+    const QList<QXmppElementPrivate *> &siblings_d = d->parent->children;
     for (int i = siblings_d.indexOf(d) + 1; i < siblings_d.size(); i++)
         if (name.isEmpty() || siblings_d[i]->name == name)
             return QXmppElement(siblings_d[i]);
@@ -207,7 +204,7 @@ void QXmppElement::removeChild(const QXmppElement &child)
 
     d->children.removeAll(child.d);
     child.d->counter.deref();
-    child.d->parent = NULL;
+    child.d->parent = nullptr;
 }
 
 QString QXmppElement::tagName() const
@@ -237,13 +234,13 @@ void QXmppElement::toXml(QXmlStreamWriter *writer) const
 
     writer->writeStartElement(d->name);
     if (d->attributes.contains("xmlns"))
-        writer->writeAttribute("xmlns", d->attributes.value("xmlns"));
-    foreach (const QString &attr, d->attributes.keys())
+        writer->writeDefaultNamespace(d->attributes.value("xmlns"));
+    for (const auto &attr : d->attributes.keys())
         if (attr != "xmlns")
             helperToXmlAddAttribute(writer, attr, d->attributes.value(attr));
     if (!d->value.isEmpty())
         writer->writeCharacters(d->value);
-    foreach (const QXmppElement &child, d->children)
-        child.toXml(writer);
+    for (auto *childPrivate : d->children)
+        QXmppElement(childPrivate).toXml(writer);
     writer->writeEndElement();
 }

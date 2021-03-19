@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Ian Reinhart Geiser
@@ -24,10 +24,10 @@
 #ifndef QXMPPREMOTEMETHOD_H
 #define QXMPPREMOTEMETHOD_H
 
+#include "QXmppRpcIq.h"
+
 #include <QObject>
 #include <QVariant>
-
-#include "QXmppRpcIq.h"
 
 class QXmppClient;
 
@@ -44,20 +44,19 @@ class QXMPP_EXPORT QXmppRemoteMethod : public QObject
     Q_OBJECT
 public:
     QXmppRemoteMethod(const QString &jid, const QString &method, const QVariantList &args, QXmppClient *client);
-    QXmppRemoteMethodResult call( );
+    QXmppRemoteMethodResult call();
 
-private slots:
-    void gotError( const QXmppRpcErrorIq &iq );
-    void gotResult( const QXmppRpcResponseIq &iq );
+private Q_SLOTS:
+    void gotError(const QXmppRpcErrorIq &iq);
+    void gotResult(const QXmppRpcResponseIq &iq);
 
-signals:
+Q_SIGNALS:
     void callDone();
 
 private:
     QXmppRpcInvokeIq m_payload;
     QXmppClient *m_client;
     QXmppRemoteMethodResult m_result;
-
 };
 
-#endif // QXMPPREMOTEMETHOD_H
+#endif  // QXMPPREMOTEMETHOD_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -41,26 +41,26 @@ class QXMPP_EXPORT QXmppIncomingClient : public QXmppStream
     Q_OBJECT
 
 public:
-    QXmppIncomingClient(QSslSocket *socket, const QString &domain, QObject *parent = 0);
-    ~QXmppIncomingClient();
+    QXmppIncomingClient(QSslSocket *socket, const QString &domain, QObject *parent = nullptr);
+    ~QXmppIncomingClient() override;
 
-    bool isConnected() const;
+    bool isConnected() const override;
     QString jid() const;
 
     void setInactivityTimeout(int secs);
     void setPasswordChecker(QXmppPasswordChecker *checker);
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when an element is received.
     void elementReceived(const QDomElement &element);
 
 protected:
     /// \cond
-    void handleStream(const QDomElement &element);
-    void handleStanza(const QDomElement &element);
+    void handleStream(const QDomElement &element) override;
+    void handleStanza(const QDomElement &element) override;
     /// \endcond
 
-private slots:
+private Q_SLOTS:
     void onDigestReply();
     void onPasswordReply();
     void onSocketDisconnected();
@@ -68,7 +68,7 @@ private slots:
 
 private:
     Q_DISABLE_COPY(QXmppIncomingClient)
-    QXmppIncomingClientPrivate* d;
+    QXmppIncomingClientPrivate *d;
     friend class QXmppIncomingClientPrivate;
 };
 

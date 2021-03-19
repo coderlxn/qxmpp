@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,11 +24,11 @@
 #ifndef QXMPPSTREAMINITIATIONIQ_P_H
 #define QXMPPSTREAMINITIATIONIQ_P_H
 
-#include <QDateTime>
-
 #include "QXmppDataForm.h"
 #include "QXmppIq.h"
 #include "QXmppTransferManager.h"
+
+#include <QDateTime>
 
 //
 //  W A R N I N G
@@ -70,8 +70,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:

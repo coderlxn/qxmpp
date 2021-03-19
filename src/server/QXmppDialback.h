@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Jeremy Lainé
@@ -27,7 +27,7 @@
 #include "QXmppStanza.h"
 
 /// \brief The QXmppDialback class represents a stanza used for the Server
-/// Dialback protocol as specified by XEP-0220: Server Dialback.
+/// Dialback protocol as specified by \xep{0220}: Server Dialback.
 ///
 /// \ingroup Stanzas
 
@@ -36,10 +36,10 @@ class QXMPP_EXPORT QXmppDialback : public QXmppStanza
 public:
     /// This enum is used to describe a dialback command.
     enum Command {
-        Result, ///< A dialback command between the originating server
-                ///< and the receiving server.
-        Verify  ///< A dialback command between the receiving server
-                ///< and the authoritative server.
+        Result,  ///< A dialback command between the originating server
+                 ///< and the receiving server.
+        Verify   ///< A dialback command between the receiving server
+                 ///< and the authoritative server.
     };
 
     QXmppDialback();
@@ -54,8 +54,8 @@ public:
     void setType(const QString &type);
 
     /// \cond
-    void parse(const QDomElement &element);
-    void toXml(QXmlStreamWriter *writer) const;
+    void parse(const QDomElement &element) override;
+    void toXml(QXmlStreamWriter *writer) const override;
 
     static bool isDialback(const QDomElement &element);
     /// \endcond

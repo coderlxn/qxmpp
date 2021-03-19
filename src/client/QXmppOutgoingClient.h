@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -21,7 +21,6 @@
  * Lesser General Public License for more details.
  *
  */
-
 
 #ifndef QXMPPOUTGOINGCLIENT_H
 #define QXMPPOUTGOINGCLIENT_H
@@ -50,18 +49,21 @@ class QXMPP_EXPORT QXmppOutgoingClient : public QXmppStream
 
 public:
     QXmppOutgoingClient(QObject *parent);
-    ~QXmppOutgoingClient();
+    ~QXmppOutgoingClient() override;
 
     void connectToHost();
     bool isAuthenticated() const;
-    bool isConnected() const;
+    bool isConnected() const override;
+    bool isClientStateIndicationEnabled() const;
+    bool isStreamManagementEnabled() const;
+    bool isStreamResumed() const;
 
     QSslSocket *socket() const { return QXmppStream::socket(); };
     QXmppStanza::Error::Condition xmppStreamError();
 
-    QXmppConfiguration& configuration();
+    QXmppConfiguration &configuration();
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when an error is encountered.
     void error(QXmppClient::Error);
 
@@ -69,13 +71,14 @@ signals:
     void elementReceived(const QDomElement &element, bool &handled);
 
     /// This signal is emitted when a presence is received.
-    void presenceReceived(const QXmppPresence&);
+    void presenceReceived(const QXmppPresence &);
 
     /// This signal is emitted when a message is received.
-    void messageReceived(const QXmppMessage&);
+    void messageReceived(const QXmppMessage &);
 
-    /// This signal is emitted when an IQ is received.
-    void iqReceived(const QXmppIq&);
+    /// This signal is emitted when an IQ response (type result or error) has
+    /// been received that was not handled by elementReceived().
+    void iqReceived(const QXmppIq &);
 
     /// This signal is emitted when SSL errors are encountered.
     void sslErrors(const QList<QSslError> &errors);
@@ -83,19 +86,19 @@ signals:
 protected:
     /// \cond
     // Overridable methods
-    virtual void handleStart();
-    virtual void handleStanza(const QDomElement &element);
-    virtual void handleStream(const QDomElement &element);
+    void handleStart() override;
+    void handleStanza(const QDomElement &element) override;
+    void handleStream(const QDomElement &element) override;
     /// \endcond
 
-public slots:
-    virtual void disconnectFromHost();
+public Q_SLOTS:
+    void disconnectFromHost() override;
 
-private slots:
+private Q_SLOTS:
     void _q_dnsLookupFinished();
     void _q_socketDisconnected();
     void socketError(QAbstractSocket::SocketError);
-    void socketSslErrors(const QList<QSslError>&);
+    void socketSslErrors(const QList<QSslError> &);
 
     void pingStart();
     void pingStop();
@@ -103,8 +106,13 @@ private slots:
     void pingTimeout();
 
 private:
+    bool setResumeAddress(const QString &address);
+    static std::pair<QString, int> parseHostAddress(const QString &address);
+
     friend class QXmppOutgoingClientPrivate;
-    QXmppOutgoingClientPrivate * const d;
+    friend class tst_QXmppOutgoingClient;
+
+    QXmppOutgoingClientPrivate *const d;
 };
 
-#endif // QXMPPOUTGOINGCLIENT_H
+#endif  // QXMPPOUTGOINGCLIENT_H

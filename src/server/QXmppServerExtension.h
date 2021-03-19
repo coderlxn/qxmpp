@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,12 +24,11 @@
 #ifndef QXMPPSERVEREXTENSION_H
 #define QXMPPSERVEREXTENSION_H
 
-#include <QVariant>
-
 #include "QXmppLogger.h"
 
+#include <QVariant>
+
 class QDomElement;
-class QStringList;
 
 class QXmppServer;
 class QXmppServerExtensionPrivate;
@@ -51,7 +50,7 @@ class QXMPP_EXPORT QXmppServerExtension : public QXmppLoggable
 
 public:
     QXmppServerExtension();
-    ~QXmppServerExtension();
+    ~QXmppServerExtension() override;
     virtual QString extensionName() const;
     virtual int extensionPriority() const;
 
@@ -69,7 +68,7 @@ protected:
 
 private:
     void setServer(QXmppServer *server);
-    QXmppServerExtensionPrivate * const d;
+    QXmppServerExtensionPrivate *const d;
 
     friend class QXmppServer;
 };

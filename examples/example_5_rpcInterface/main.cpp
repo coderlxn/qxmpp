@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *	Manjeet Dahiya
@@ -22,13 +22,12 @@
  *
  */
 
-#include <QCoreApplication>
-
 #include "QXmppClient.h"
 #include "QXmppLogger.h"
 #include "QXmppRpcManager.h"
 
 #include "remoteinterface.h"
+#include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {
@@ -39,7 +38,7 @@ int main(int argc, char *argv[])
     QXmppClient client;
 
     // add RPC extension and register interface
-    QXmppRpcManager *manager = new QXmppRpcManager;
+    auto *manager = new QXmppRpcManager;
     client.addExtension(manager);
     manager->addInvokableInterface(new RemoteInterface(&client));
 

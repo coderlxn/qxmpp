@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,16 +21,19 @@
  *
  */
 
-
 #ifndef QXMPPENTITYTIMEIQ_H
 #define QXMPPENTITYTIMEIQ_H
 
-#include <QDateTime>
-
 #include "QXmppIq.h"
 
-/// \ingroup Stanzas
+#include <QDateTime>
 
+///
+/// \brief QXmppEntityTimeIq represents an entity time request/response as
+/// defined in \xep{0202}: Entity Time.
+///
+/// \ingroup Stanzas
+///
 class QXMPP_EXPORT QXmppEntityTimeIq : public QXmppIq
 {
 public:
@@ -44,8 +47,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -53,4 +56,4 @@ private:
     QDateTime m_utc;
 };
 
-#endif //QXMPPENTITYTIMEIQ_H
+#endif  //QXMPPENTITYTIMEIQ_H

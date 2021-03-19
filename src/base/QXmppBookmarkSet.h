@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,13 +24,13 @@
 #ifndef QXMPPBOOKMARKSET_H
 #define QXMPPBOOKMARKSET_H
 
+#include "QXmppStanza.h"
+
 #include <QList>
 #include <QUrl>
 
-#include "QXmppStanza.h"
-
 /// \brief The QXmppBookmarkConference class represents a bookmark for a conference room,
-/// as defined by XEP-0048: Bookmarks.
+/// as defined by \xep{0048}: Bookmarks.
 ///
 class QXMPP_EXPORT QXmppBookmarkConference
 {
@@ -57,7 +57,7 @@ private:
 };
 
 /// \brief The QXmppBookmarkUrl class represents a bookmark for a web page,
-/// as defined by XEP-0048: Bookmarks.
+/// as defined by \xep{0048}: Bookmarks.
 ///
 class QXMPP_EXPORT QXmppBookmarkUrl
 {
@@ -74,7 +74,7 @@ private:
 };
 
 /// \brief The QXmppbookmarkSets class represents a set of bookmarks, as defined
-/// by XEP-0048: Bookmarks.
+/// by \xep{0048}: Bookmarks.
 ///
 class QXMPP_EXPORT QXmppBookmarkSet
 {

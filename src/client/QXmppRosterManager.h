@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -25,82 +25,90 @@
 #ifndef QXMPPROSTERMANAGER_H
 #define QXMPPROSTERMANAGER_H
 
-#include <QObject>
-#include <QMap>
-#include <QStringList>
-
 #include "QXmppClientExtension.h"
 #include "QXmppPresence.h"
 #include "QXmppRosterIq.h"
 
+#include <QMap>
+#include <QObject>
+#include <QStringList>
+
 class QXmppRosterManagerPrivate;
 
-/// \brief The QXmppRosterManager class provides access to a connected client's roster.
 ///
-/// \note It's object should not be created using it's constructor. Instead
-/// QXmppClient::rosterManager() should be used to get the reference of instantiated
-/// object this class.
+/// \brief The QXmppRosterManager class provides access to a connected client's
+/// roster.
 ///
-/// It stores all the Roster and Presence details of all the roster entries (that
-/// is all the bareJids) in the client's friend's list. It provides the
+/// \note Its object should not be created using its constructor. Instead
+/// \c QXmppClient::findExtension<QXmppRosterManager>() should be used to get
+/// the instantiated object of this class.
+///
+/// It stores all the Roster and Presence details of all the roster entries
+/// (that is all the bareJids) in the client's friend's list. It provides the
 /// functionality to get all the bareJids in the client's roster and Roster and
 /// Presence details of the same.
 ///
-/// After the successful xmpp connection that after the signal QXmppClient::connected()
-/// is emitted QXmpp requests for getting the roster. Once QXmpp receives the roster
-/// the signal QXmppRosterManager::rosterReceived() is emitted and after that user can
-/// use the functions of this class to get roster entries.
+/// After the QXmpp connected successfully to the XMPP server the signal
+/// \c QXmppClient::connected() is emitted and the roster is requested from the
+/// server. Once QXmpp receives the roster the signal
+/// \c QXmppRosterManager::rosterReceived() is emitted and after that the
+/// methods of this class can be used to get the roster entries.
 ///
-/// Function QXmppRosterManager::isRosterReceived() tells whether the roster has been
-/// received or not.
+/// \c QXmppRosterManager::isRosterReceived() can be used to find out whether
+/// the roster has been received yet.
 ///
-/// The itemAdded(), itemChanged() and itemRemoved() signals are emitted whenever roster
-/// entries are added, changed or removed.
+/// The \c itemAdded(), \c itemChanged() and \c itemRemoved() signals are
+/// emitted whenever roster entries are added, changed or removed.
 ///
-/// The presenceChanged() signal is emitted whenever the presence for a roster item changes.
+/// The \c presenceChanged() signal is emitted whenever the presence for a
+/// roster item changes.
 ///
 /// \ingroup Managers
-
+///
 class QXMPP_EXPORT QXmppRosterManager : public QXmppClientExtension
 {
     Q_OBJECT
 
 public:
-    QXmppRosterManager(QXmppClient* stream);
-    ~QXmppRosterManager();
+    QXmppRosterManager(QXmppClient *stream);
+    ~QXmppRosterManager() override;
 
     bool isRosterReceived() const;
     QStringList getRosterBareJids() const;
-    QXmppRosterIq::Item getRosterEntry(const QString& bareJid) const;
+    QXmppRosterIq::Item getRosterEntry(const QString &bareJid) const;
 
-    QStringList getResources(const QString& bareJid) const;
+    QStringList getResources(const QString &bareJid) const;
     QMap<QString, QXmppPresence> getAllPresencesForBareJid(
-            const QString& bareJid) const;
-    QXmppPresence getPresence(const QString& bareJid,
-                              const QString& resource) const;
+        const QString &bareJid) const;
+    QXmppPresence getPresence(const QString &bareJid,
+                              const QString &resource) const;
 
     /// \cond
-    bool handleStanza(const QDomElement &element);
+    bool handleStanza(const QDomElement &element) override;
     /// \endcond
 
-public slots:
-    bool acceptSubscription(const QString &bareJid, const QString &reason = QString());
-    bool refuseSubscription(const QString &bareJid, const QString &reason = QString());
-    bool addItem(const QString &bareJid, const QString &name = QString(), const QSet<QString> &groups = QSet<QString>());
+public Q_SLOTS:
+    bool acceptSubscription(const QString &bareJid, const QString &reason = {});
+    bool refuseSubscription(const QString &bareJid, const QString &reason = {});
+    bool addItem(const QString &bareJid, const QString &name = {}, const QSet<QString> &groups = {});
     bool removeItem(const QString &bareJid);
     bool renameItem(const QString &bareJid, const QString &name);
-    bool subscribe(const QString &bareJid, const QString &reason = QString());
-    bool unsubscribe(const QString &bareJid, const QString &reason = QString());
+    bool subscribe(const QString &bareJid, const QString &reason = {});
+    bool unsubscribe(const QString &bareJid, const QString &reason = {});
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when the Roster IQ is received after a successful
     /// connection. That is the roster entries are empty before this signal is emitted.
     /// One should use getRosterBareJids() and getRosterEntry() only after
     /// this signal has been emitted.
+    ///
+    /// \note If the previous stream could be resumed, this signal is not
+    /// emitted since QXmpp 1.4. Changes since the last connection are reported
+    /// via the itemAdded(), itemChanged() and itemRemoved() signals.
     void rosterReceived();
 
     /// This signal is emitted when the presence of a particular bareJid and resource changes.
-    void presenceChanged(const QString& bareJid, const QString& resource);
+    void presenceChanged(const QString &bareJid, const QString &resource);
 
     /// This signal is emitted when a contact asks to subscribe to your presence.
     ///
@@ -109,27 +117,27 @@ signals:
     ///
     /// \note If you set QXmppConfiguration::autoAcceptSubscriptions() to true, this
     /// signal will not be emitted.
-    void subscriptionReceived(const QString& bareJid);
+    void subscriptionReceived(const QString &bareJid);
 
     /// This signal is emitted when the roster entry of a particular bareJid is
     /// added as a result of roster push.
-    void itemAdded(const QString& bareJid);
+    void itemAdded(const QString &bareJid);
 
     /// This signal is emitted when the roster entry of a particular bareJid
     /// changes as a result of roster push.
-    void itemChanged(const QString& bareJid);
+    void itemChanged(const QString &bareJid);
 
     /// This signal is emitted when the roster entry of a particular bareJid is
     /// removed as a result of roster push.
-    void itemRemoved(const QString& bareJid);
+    void itemRemoved(const QString &bareJid);
 
-private slots:
+private Q_SLOTS:
     void _q_connected();
     void _q_disconnected();
-    void _q_presenceReceived(const QXmppPresence&);
+    void _q_presenceReceived(const QXmppPresence &);
 
 private:
     QXmppRosterManagerPrivate *d;
 };
 
-#endif // QXMPPROSTER_H
+#endif  // QXMPPROSTER_H

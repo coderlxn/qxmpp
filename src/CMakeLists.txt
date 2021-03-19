@@ -1,9 +1,17 @@
+option(BUILD_SHARED "Build SHARED library" ON)
+
 add_definitions(-DQXMPP_BUILD)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/base)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/client)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/server)
 
+# Configure QXmppGlobal.h.in
+if(BUILD_SHARED)
+    set(QXMPP_BUILD_SHARED true)
+else()
+    set(QXMPP_BUILD_SHARED false)
+endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/base/QXmppGlobal.h.in ${CMAKE_CURRENT_BINARY_DIR}/base/QXmppGlobal.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/base)
 
@@ -13,33 +21,41 @@ set(INSTALL_HEADER_FILES
     # Base
     base/QXmppArchiveIq.h
     base/QXmppBindIq.h
+    base/QXmppBitsOfBinaryContentId.h
+    base/QXmppBitsOfBinaryData.h
+    base/QXmppBitsOfBinaryDataList.h
+    base/QXmppBitsOfBinaryIq.h
     base/QXmppBookmarkSet.h
     base/QXmppByteStreamIq.h
     base/QXmppDataForm.h
     base/QXmppDiscoveryIq.h
     base/QXmppElement.h
     base/QXmppEntityTimeIq.h
+    base/QXmppHttpUploadIq.h
     base/QXmppIbbIq.h
     base/QXmppIq.h
     base/QXmppJingleIq.h
     base/QXmppLogger.h
     base/QXmppMamIq.h
     base/QXmppMessage.h
+    base/QXmppMixInvitation.h
+    base/QXmppMixIq.h
+    base/QXmppMixItem.h
     base/QXmppMucIq.h
     base/QXmppNonSASLAuth.h
     base/QXmppPingIq.h
     base/QXmppPresence.h
     base/QXmppPubSubIq.h
+    base/QXmppPubSubItem.h
+    base/QXmppPushEnableIq.h
     base/QXmppRegisterIq.h
     base/QXmppResultSet.h
     base/QXmppRosterIq.h
     base/QXmppRpcIq.h
-    base/QXmppRtcpPacket.h
-    base/QXmppRtpChannel.h
-    base/QXmppRtpPacket.h
     base/QXmppSessionIq.h
     base/QXmppSocks.h
     base/QXmppStanza.h
+    base/QXmppStartTlsPacket.h
     base/QXmppStream.h
     base/QXmppStreamFeatures.h
     base/QXmppStun.h
@@ -49,8 +65,8 @@ set(INSTALL_HEADER_FILES
 
     # Client
     client/QXmppArchiveManager.h
+    client/QXmppAttentionManager.h
     client/QXmppBookmarkManager.h
-    client/QXmppCallManager.h
     client/QXmppCarbonManager.h
     client/QXmppClient.h
     client/QXmppClientExtension.h
@@ -62,11 +78,13 @@ set(INSTALL_HEADER_FILES
     client/QXmppMessageReceiptManager.h
     client/QXmppMucManager.h
     client/QXmppOutgoingClient.h
+    client/QXmppRegistrationManager.h
     client/QXmppRemoteMethod.h
     client/QXmppRosterManager.h
     client/QXmppRpcManager.h
     client/QXmppTransferManager.h
     client/QXmppTransferManager_p.h
+    client/QXmppUploadRequestManager.h
     client/QXmppVCardManager.h
     client/QXmppVersionManager.h
 
@@ -85,36 +103,43 @@ set(SOURCE_FILES
     # Base
     base/QXmppArchiveIq.cpp
     base/QXmppBindIq.cpp
+    base/QXmppBitsOfBinaryContentId.cpp
+    base/QXmppBitsOfBinaryData.cpp
+    base/QXmppBitsOfBinaryDataList.cpp
+    base/QXmppBitsOfBinaryIq.cpp
     base/QXmppBookmarkSet.cpp
     base/QXmppByteStreamIq.cpp
-    base/QXmppCodec.cpp
     base/QXmppConstants.cpp
     base/QXmppDataForm.cpp
     base/QXmppDiscoveryIq.cpp
     base/QXmppElement.cpp
     base/QXmppEntityTimeIq.cpp
+    base/QXmppHttpUploadIq.cpp
     base/QXmppIbbIq.cpp
     base/QXmppIq.cpp
     base/QXmppJingleIq.cpp
     base/QXmppLogger.cpp
     base/QXmppMamIq.cpp
     base/QXmppMessage.cpp
+    base/QXmppMixInvitation.cpp
+    base/QXmppMixIq.cpp
+    base/QXmppMixItem.cpp
     base/QXmppMucIq.cpp
     base/QXmppNonSASLAuth.cpp
     base/QXmppPingIq.cpp
     base/QXmppPresence.cpp
     base/QXmppPubSubIq.cpp
+    base/QXmppPubSubItem.cpp
+    base/QXmppPushEnableIq.cpp
     base/QXmppRegisterIq.cpp
     base/QXmppResultSet.cpp
     base/QXmppRosterIq.cpp
     base/QXmppRpcIq.cpp
-    base/QXmppRtcpPacket.cpp
-    base/QXmppRtpChannel.cpp
-    base/QXmppRtpPacket.cpp
     base/QXmppSasl.cpp
     base/QXmppSessionIq.cpp
     base/QXmppSocks.cpp
     base/QXmppStanza.cpp
+    base/QXmppStartTlsPacket.cpp
     base/QXmppStream.cpp
     base/QXmppStreamFeatures.cpp
     base/QXmppStreamInitiationIq.cpp
@@ -125,24 +150,28 @@ set(SOURCE_FILES
     base/QXmppVersionIq.cpp
 
     # Client
-    client/QXmppDiscoveryManager.cpp
     client/QXmppArchiveManager.cpp
+    client/QXmppAttentionManager.cpp
     client/QXmppBookmarkManager.cpp
-    client/QXmppCallManager.cpp
     client/QXmppCarbonManager.cpp
     client/QXmppClient.cpp
     client/QXmppClientExtension.cpp
     client/QXmppConfiguration.cpp
+    client/QXmppDiscoveryManager.cpp
     client/QXmppEntityTimeManager.cpp
+    client/QXmppInternalClientExtension.cpp
     client/QXmppInvokable.cpp
     client/QXmppMamManager.cpp
     client/QXmppMessageReceiptManager.cpp
     client/QXmppMucManager.cpp
     client/QXmppOutgoingClient.cpp
-    client/QXmppRemoteMethod.cpp
     client/QXmppRosterManager.cpp
+    client/QXmppRegistrationManager.cpp
+    client/QXmppRemoteMethod.cpp
     client/QXmppRpcManager.cpp
+    client/QXmppTlsManager.cpp
     client/QXmppTransferManager.cpp
+    client/QXmppUploadRequestManager.cpp
     client/QXmppVCardManager.cpp
     client/QXmppVersionManager.cpp
 
@@ -157,40 +186,34 @@ set(SOURCE_FILES
     server/QXmppServerPlugin.cpp
 )
 
-option(WITH_SPEEX "Support the Speex codec" OFF)
-option(WITH_OPUS "Support the Opus codec" OFF)
-option(WITH_THEORA "Support the Theora codec" OFF)
-option(WITH_VPX "Support the VPX codec" OFF)
+if(WITH_GSTREAMER)
+    find_package(GStreamer REQUIRED)
+    find_package(GLIB2 REQUIRED)
+    find_package(GObject REQUIRED)
 
-if(WITH_SPEEX)
-    find_package(Speex REQUIRED)
-    include_directories(${Speex_INCLUDE_DIRS})
-    set(MULTIMEDIA_LIBS ${MULTIMEDIA_LIBS} ${Speex_LIBRARIES})
-    add_definitions(-DQXMPP_USE_SPEEX)
-endif()
-if(WITH_OPUS)
-    find_package(Opus REQUIRED)
-    include_directories(${Opus_INCLUDE_DIRS})
-    set(MULTIMEDIA_LIBS ${MULTIMEDIA_LIBS} ${Opus_LIBRARIES})
-    add_definitions(-DQXMPP_USE_OPUS)
-endif()
-if(WITH_THEORA)
-    find_package(Theora REQUIRED)
-    include_directories(${Theora_INCLUDE_DIRS})
-    set(MULTIMEDIA_LIBS ${MULTIMEDIA_LIBS} ${Theora_LIBRARIES})
-    add_definitions(-DQXMPP_USE_THEORA)
-endif()
-if(WITH_VPX)
-    find_package(VPX REQUIRED)
-    include_directories(${VPX_INCLUDE_DIRS})
-    set(MULTIMEDIA_LIBS ${MULTIMEDIA_LIBS} ${VPX_LIBRARIES})
-    add_definitions(-DQXMPP_USE_VPX)
+    set(INSTALL_HEADER_FILES
+        ${INSTALL_HEADER_FILES}
+        client/QXmppCall.h
+        client/QXmppCallManager.h
+        client/QXmppCallStream.h
+    )
+
+    set(SOURCE_FILES
+        ${SOURCE_FILES}
+        client/QXmppCall.cpp
+        client/QXmppCallManager.cpp
+        client/QXmppCallStream.cpp
+    )
 endif()
 
-add_library(qxmpp SHARED ${SOURCE_FILES})
+if(BUILD_SHARED)
+    add_library(qxmpp SHARED ${SOURCE_FILES})
+else()
+    add_library(qxmpp STATIC ${SOURCE_FILES})
+endif()
 
 set_target_properties(qxmpp PROPERTIES
-    VERSION ${VERSION_STRING}
+    VERSION ${PROJECT_VERSION}
     SOVERSION ${SO_VERSION}
     EXPORT_NAME QXmpp
 )
@@ -202,16 +225,26 @@ target_include_directories(qxmpp
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/server>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/base>
     $<INSTALL_INTERFACE:include/qxmpp>
+    ${GLIB2_INCLUDE_DIR}
+    ${GOBJECT_INCLUDE_DIR}
+    ${GSTREAMER_INCLUDE_DIRS}
 )
 
 target_link_libraries(qxmpp
     PUBLIC
-    Qt5::Core
-    Qt5::Network
-    Qt5::Xml
-    PRIVATE
-    ${MULTIMEDIA_LIBS}
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Xml
 )
+
+if(WITH_GSTREAMER)
+    target_link_libraries(qxmpp
+        PRIVATE
+        ${GLIB2_LIBRARIES}
+        ${GOBJECT_LIBRARIES}
+        ${GSTREAMER_LIBRARY}
+    )
+endif()
 
 install(
     TARGETS qxmpp

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,11 +21,12 @@
  *
  */
 
-#include <QDomElement>
+#include "QXmppVersionIq.h"
 
 #include "QXmppConstants_p.h"
 #include "QXmppUtils.h"
-#include "QXmppVersionIq.h"
+
+#include <QDomElement>
 
 /// Returns the name of the software.
 ///
@@ -81,31 +82,31 @@ void QXmppVersionIq::setVersion(const QString &version)
 /// \cond
 bool QXmppVersionIq::isVersionIq(const QDomElement &element)
 {
-    QDomElement queryElement = element.firstChildElement("query");
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("query"));
     return queryElement.namespaceURI() == ns_version;
 }
 
 void QXmppVersionIq::parseElementFromChild(const QDomElement &element)
 {
-    QDomElement queryElement = element.firstChildElement("query");
-    m_name = queryElement.firstChildElement("name").text();
-    m_os = queryElement.firstChildElement("os").text();
-    m_version = queryElement.firstChildElement("version").text();
+    QDomElement queryElement = element.firstChildElement(QStringLiteral("query"));
+    m_name = queryElement.firstChildElement(QStringLiteral("name")).text();
+    m_os = queryElement.firstChildElement(QStringLiteral("os")).text();
+    m_version = queryElement.firstChildElement(QStringLiteral("version")).text();
 }
 
 void QXmppVersionIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("query");
-    writer->writeAttribute("xmlns", ns_version);
+    writer->writeStartElement(QStringLiteral("query"));
+    writer->writeDefaultNamespace(ns_version);
 
     if (!m_name.isEmpty())
-        helperToXmlAddTextElement(writer, "name", m_name);
+        helperToXmlAddTextElement(writer, QStringLiteral("name"), m_name);
 
     if (!m_os.isEmpty())
-        helperToXmlAddTextElement(writer, "os", m_os);
+        helperToXmlAddTextElement(writer, QStringLiteral("os"), m_os);
 
     if (!m_version.isEmpty())
-        helperToXmlAddTextElement(writer, "version", m_version);
+        helperToXmlAddTextElement(writer, QStringLiteral("version"), m_version);
 
     writer->writeEndElement();
 }

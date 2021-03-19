@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *	Ian Reinhart Geiser
@@ -22,13 +22,13 @@
  *
  */
 
-#include <QDebug>
-#include <QTimer>
+#include "rpcClient.h"
 
 #include "QXmppRpcManager.h"
 #include "QXmppUtils.h"
 
-#include "rpcClient.h"
+#include <QDebug>
+#include <QTimer>
 
 rpcClient::rpcClient(QObject *parent)
     : QXmppClient(parent)
@@ -38,10 +38,8 @@ rpcClient::rpcClient(QObject *parent)
     addExtension(m_rpcManager);
 
     // observe incoming presences
-    bool check = connect(this, SIGNAL(presenceReceived(QXmppPresence)),
-                         this, SLOT(slotPresenceReceived(QXmppPresence)));
-    Q_ASSERT(check);
-    Q_UNUSED(check);
+    connect(this, &QXmppClient::presenceReceived,
+            this, &rpcClient::slotPresenceReceived);
 }
 
 rpcClient::~rpcClient()
@@ -51,8 +49,8 @@ rpcClient::~rpcClient()
 void rpcClient::slotInvokeRemoteMethod()
 {
     QXmppRemoteMethodResult methodResult = m_rpcManager->callRemoteMethod(
-            m_remoteJid, "RemoteInterface.echoString", "This is a test" );
-    if( methodResult.hasError )
+        m_remoteJid, "RemoteInterface.echoString", "This is a test");
+    if (methodResult.hasError)
         qDebug() << "Error:" << methodResult.code << methodResult.errorMessage;
     else
         qDebug() << "Result:" << methodResult.result;
@@ -73,6 +71,5 @@ void rpcClient::slotPresenceReceived(const QXmppPresence &presence)
 
     // invoke the remote method in 1 second
     m_remoteJid = presence.from();
-    QTimer::singleShot(1000, this, SLOT(slotInvokeRemoteMethod()));
+    QTimer::singleShot(1000, this, &rpcClient::slotInvokeRemoteMethod);
 }
-

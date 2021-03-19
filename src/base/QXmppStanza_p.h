@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Niels Ole Salscheider
@@ -26,6 +26,8 @@
 
 #include "QXmppStanza.h"
 
+#include <optional>
+
 //  W A R N I N G
 //  -------------
 //
@@ -38,10 +40,9 @@
 // We mean it.
 //
 
-static QString strFromCondition(const QXmppStanza::Error::Condition& condition)
+static QString conditionToString(QXmppStanza::Error::Condition condition)
 {
-    switch(condition)
-    {
+    switch (condition) {
     case QXmppStanza::Error::BadRequest:
         return "bad-request";
     case QXmppStanza::Error::Conflict:
@@ -64,8 +65,13 @@ static QString strFromCondition(const QXmppStanza::Error::Condition& condition)
         return "not-allowed";
     case QXmppStanza::Error::NotAuthorized:
         return "not-authorized";
+        QT_WARNING_PUSH
+        QT_WARNING_DISABLE_DEPRECATED
     case QXmppStanza::Error::PaymentRequired:
+        QT_WARNING_POP
         return "payment-required";
+    case QXmppStanza::Error::PolicyViolation:
+        return "policy-violation";
     case QXmppStanza::Error::RecipientUnavailable:
         return "recipient-unavailable";
     case QXmppStanza::Error::Redirect:
@@ -86,60 +92,94 @@ static QString strFromCondition(const QXmppStanza::Error::Condition& condition)
         return "undefined-condition";
     case QXmppStanza::Error::UnexpectedRequest:
         return "unexpected-request";
-    default:
-        return "";
     }
+    return {};
 }
 
-static QXmppStanza::Error::Condition conditionFromStr(const QString& string)
+static std::optional<QXmppStanza::Error::Condition> conditionFromString(const QString &string)
 {
-    if(string == "bad-request")
+    if (string == "bad-request")
         return QXmppStanza::Error::BadRequest;
-    else if(string == "conflict")
+    else if (string == "conflict")
         return QXmppStanza::Error::Conflict;
-    else if(string == "feature-not-implemented")
+    else if (string == "feature-not-implemented")
         return QXmppStanza::Error::FeatureNotImplemented;
-    else if(string == "forbidden")
+    else if (string == "forbidden")
         return QXmppStanza::Error::Forbidden;
-    else if(string == "gone")
+    else if (string == "gone")
         return QXmppStanza::Error::Gone;
-    else if(string == "internal-server-error")
+    else if (string == "internal-server-error")
         return QXmppStanza::Error::InternalServerError;
-    else if(string == "item-not-found")
+    else if (string == "item-not-found")
         return QXmppStanza::Error::ItemNotFound;
-    else if(string == "jid-malformed")
+    else if (string == "jid-malformed")
         return QXmppStanza::Error::JidMalformed;
-    else if(string == "not-acceptable")
+    else if (string == "not-acceptable")
         return QXmppStanza::Error::NotAcceptable;
-    else if(string == "not-allowed")
+    else if (string == "not-allowed")
         return QXmppStanza::Error::NotAllowed;
-    else if(string == "not-authorized")
+    else if (string == "not-authorized")
         return QXmppStanza::Error::NotAuthorized;
-    else if(string == "payment-required")
+    else if (string == "payment-required") {
+        QT_WARNING_PUSH
+        QT_WARNING_DISABLE_DEPRECATED
         return QXmppStanza::Error::PaymentRequired;
-    else if(string == "recipient-unavailable")
+        QT_WARNING_POP
+    } else if (string == "policy-violation")
+        return QXmppStanza::Error::PolicyViolation;
+    else if (string == "recipient-unavailable")
         return QXmppStanza::Error::RecipientUnavailable;
-    else if(string == "redirect")
+    else if (string == "redirect")
         return QXmppStanza::Error::Redirect;
-    else if(string == "registration-required")
+    else if (string == "registration-required")
         return QXmppStanza::Error::RegistrationRequired;
-    else if(string == "remote-server-not-found")
+    else if (string == "remote-server-not-found")
         return QXmppStanza::Error::RemoteServerNotFound;
-    else if(string == "remote-server-timeout")
+    else if (string == "remote-server-timeout")
         return QXmppStanza::Error::RemoteServerTimeout;
-    else if(string == "resource-constraint")
+    else if (string == "resource-constraint")
         return QXmppStanza::Error::ResourceConstraint;
-    else if(string == "service-unavailable")
+    else if (string == "service-unavailable")
         return QXmppStanza::Error::ServiceUnavailable;
-    else if(string == "subscription-required")
+    else if (string == "subscription-required")
         return QXmppStanza::Error::SubscriptionRequired;
-    else if(string == "undefined-condition")
+    else if (string == "undefined-condition")
         return QXmppStanza::Error::UndefinedCondition;
-    else if(string == "unexpected-request")
+    else if (string == "unexpected-request")
         return QXmppStanza::Error::UnexpectedRequest;
-    else
-        return static_cast<QXmppStanza::Error::Condition>(-1);
+    return std::nullopt;
+}
+
+static QString typeToString(QXmppStanza::Error::Type type)
+{
+    switch (type) {
+    case QXmppStanza::Error::Cancel:
+        return QStringLiteral("cancel");
+    case QXmppStanza::Error::Continue:
+        return QStringLiteral("continue");
+    case QXmppStanza::Error::Modify:
+        return QStringLiteral("modify");
+    case QXmppStanza::Error::Auth:
+        return QStringLiteral("auth");
+    case QXmppStanza::Error::Wait:
+        return QStringLiteral("wait");
+    }
+    return {};
+}
+
+static std::optional<QXmppStanza::Error::Type> typeFromString(const QString &string)
+{
+    if (string == QStringLiteral("cancel"))
+        return QXmppStanza::Error::Cancel;
+    else if (string == QStringLiteral("continue"))
+        return QXmppStanza::Error::Continue;
+    else if (string == QStringLiteral("modify"))
+        return QXmppStanza::Error::Modify;
+    else if (string == QStringLiteral("auth"))
+        return QXmppStanza::Error::Auth;
+    else if (string == QStringLiteral("wait"))
+        return QXmppStanza::Error::Wait;
+    return std::nullopt;
 }
 
 #endif
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Niels Ole Salscheider
@@ -24,16 +24,31 @@
 #ifndef QXMPPMAMIQ_H
 #define QXMPPMAMIQ_H
 
-#include "QXmppIq.h"
 #include "QXmppDataForm.h"
+#include "QXmppIq.h"
 #include "QXmppResultSet.h"
 
+#include <QSharedDataPointer>
+
+class QXmppMamQueryIqPrivate;
+class QXmppMamResultIqPrivate;
+
+///
 /// \brief The QXmppMamQueryIq class represents the query IQ for
-/// XEP-0313: Message Archive Management.
+/// \xep{0313}: Message Archive Management.
+///
+/// \ingroup Stanzas
+///
+/// \since QXmpp 1.0
+///
 class QXmppMamQueryIq : public QXmppIq
 {
 public:
     QXmppMamQueryIq();
+    QXmppMamQueryIq(const QXmppMamQueryIq &);
+    ~QXmppMamQueryIq();
+
+    QXmppMamQueryIq &operator=(const QXmppMamQueryIq &);
 
     QXmppDataForm form() const;
     void setForm(const QXmppDataForm &form);
@@ -47,22 +62,29 @@ public:
     static bool isMamQueryIq(const QDomElement &element);
 
 protected:
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
 
 private:
-    QXmppDataForm m_form;
-    QXmppResultSetQuery m_resultSetQuery;
-    QString m_node;
-    QString m_queryId;
+    QSharedDataPointer<QXmppMamQueryIqPrivate> d;
 };
 
+///
 /// \brief The QXmppMamQueryIq class represents the result IQ for
-/// XEP-0313: Message Archive Management.
+/// \xep{0313}: Message Archive Management.
+///
+/// \ingroup Stanzas
+///
+/// \since QXmpp 1.0
+///
 class QXmppMamResultIq : public QXmppIq
 {
 public:
     QXmppMamResultIq();
+    QXmppMamResultIq(const QXmppMamResultIq &);
+    ~QXmppMamResultIq();
+
+    QXmppMamResultIq &operator=(const QXmppMamResultIq &);
 
     QXmppResultSetReply resultSetReply() const;
     void setResultSetReply(const QXmppResultSetReply &resultSetReply);
@@ -72,12 +94,11 @@ public:
     static bool isMamResultIq(const QDomElement &element);
 
 protected:
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
 
 private:
-    QXmppResultSetReply m_resultSetReply;
-    bool m_complete;
+    QSharedDataPointer<QXmppMamResultIqPrivate> d;
 };
 
 #endif

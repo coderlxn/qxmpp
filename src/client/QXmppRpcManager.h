@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,12 +24,12 @@
 #ifndef QXMPPRPCMANAGER_H
 #define QXMPPRPCMANAGER_H
 
-#include <QMap>
-#include <QVariant>
-
 #include "QXmppClientExtension.h"
 #include "QXmppInvokable.h"
 #include "QXmppRemoteMethod.h"
+
+#include <QMap>
+#include <QVariant>
 
 class QXmppRpcErrorIq;
 class QXmppRpcInvokeIq;
@@ -37,7 +37,7 @@ class QXmppRpcResponseIq;
 
 /// \brief The QXmppRpcManager class make it possible to invoke remote methods
 /// and to expose local interfaces for remote procedure calls, as specified by
-/// XEP-0009: Jabber-RPC.
+/// \xep{0009}: Jabber-RPC.
 ///
 /// To make use of this manager, you need to instantiate it and load it into
 /// the QXmppClient instance as follows:
@@ -58,36 +58,36 @@ class QXMPP_EXPORT QXmppRpcManager : public QXmppClientExtension
 public:
     QXmppRpcManager();
 
-    void addInvokableInterface( QXmppInvokable *interface );
-    QXmppRemoteMethodResult callRemoteMethod( const QString &jid,
-                                              const QString &interface,
-                                              const QVariant &arg1 = QVariant(),
-                                              const QVariant &arg2 = QVariant(),
-                                              const QVariant &arg3 = QVariant(),
-                                              const QVariant &arg4 = QVariant(),
-                                              const QVariant &arg5 = QVariant(),
-                                              const QVariant &arg6 = QVariant(),
-                                              const QVariant &arg7 = QVariant(),
-                                              const QVariant &arg8 = QVariant(),
-                                              const QVariant &arg9 = QVariant(),
-                                              const QVariant &arg10 = QVariant() );
+    void addInvokableInterface(QXmppInvokable *interface);
+    QXmppRemoteMethodResult callRemoteMethod(const QString &jid,
+                                             const QString &interface,
+                                             const QVariant &arg1 = QVariant(),
+                                             const QVariant &arg2 = QVariant(),
+                                             const QVariant &arg3 = QVariant(),
+                                             const QVariant &arg4 = QVariant(),
+                                             const QVariant &arg5 = QVariant(),
+                                             const QVariant &arg6 = QVariant(),
+                                             const QVariant &arg7 = QVariant(),
+                                             const QVariant &arg8 = QVariant(),
+                                             const QVariant &arg9 = QVariant(),
+                                             const QVariant &arg10 = QVariant());
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    virtual QList<QXmppDiscoveryIq::Identity> discoveryIdentities() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    QList<QXmppDiscoveryIq::Identity> discoveryIdentities() const override;
+    bool handleStanza(const QDomElement &element) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// \cond
-    void rpcCallResponse(const QXmppRpcResponseIq& result);
+    void rpcCallResponse(const QXmppRpcResponseIq &result);
     void rpcCallError(const QXmppRpcErrorIq &err);
     /// \endcond
 
 private:
     void invokeInterfaceMethod(const QXmppRpcInvokeIq &iq);
 
-    QMap<QString,QXmppInvokable*> m_interfaces;
+    QMap<QString, QXmppInvokable *> m_interfaces;
 };
 
 #endif

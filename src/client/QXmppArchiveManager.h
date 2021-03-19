@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,18 +24,14 @@
 #ifndef QXMPPARCHIVEMANAGER_H
 #define QXMPPARCHIVEMANAGER_H
 
-#include <QDateTime>
-
+#include "QXmppArchiveIq.h"
 #include "QXmppClientExtension.h"
 #include "QXmppResultSet.h"
 
-class QXmppArchiveChat;
-class QXmppArchiveChatIq;
-class QXmppArchiveListIq;
-class QXmppArchivePrefIq;
+#include <QDateTime>
 
 /// \brief The QXmppArchiveManager class makes it possible to access message
-/// archives as defined by XEP-0136: Message Archiving.
+/// archives as defined by \xep{0136}: Message Archiving.
 ///
 /// To make use of this manager, you need to instantiate it and load it into
 /// the QXmppClient instance as follows:
@@ -63,18 +59,18 @@ public:
     void retrieveCollection(const QString &jid, const QDateTime &start, int max);
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement &element) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when archive list is received
     /// after calling listCollections()
-    void archiveListReceived(const QList<QXmppArchiveChat>&, const QXmppResultSetReply &rsm = QXmppResultSetReply());
+    void archiveListReceived(const QList<QXmppArchiveChat> &, const QXmppResultSetReply &rsm = QXmppResultSetReply());
 
     /// This signal is emitted when archive chat is received
     /// after calling retrieveCollection()
-    void archiveChatReceived(const QXmppArchiveChat&, const QXmppResultSetReply &rsm = QXmppResultSetReply());
+    void archiveChatReceived(const QXmppArchiveChat &, const QXmppResultSetReply &rsm = QXmppResultSetReply());
 };
 
 #endif

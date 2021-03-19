@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -21,11 +21,11 @@
  *
  */
 
-#include <QDomElement>
-
 #include "QXmppConstants_p.h"
 #include "QXmppStreamInitiationIq_p.h"
 #include "QXmppUtils.h"
+
+#include <QDomElement>
 
 QXmppDataForm QXmppStreamInitiationIq::featureForm() const
 {
@@ -80,26 +80,25 @@ void QXmppStreamInitiationIq::setSiId(const QString &id)
 /// \cond
 bool QXmppStreamInitiationIq::isStreamInitiationIq(const QDomElement &element)
 {
-    QDomElement siElement = element.firstChildElement("si");
+    QDomElement siElement = element.firstChildElement(QStringLiteral("si"));
     return (siElement.namespaceURI() == ns_stream_initiation);
 }
 
 void QXmppStreamInitiationIq::parseElementFromChild(const QDomElement &element)
 {
-    QDomElement siElement = element.firstChildElement("si");
-    m_siId = siElement.attribute("id");
-    m_mimeType = siElement.attribute("mime-type");
-    if (siElement.attribute("profile") == ns_stream_initiation_file_transfer)
+    QDomElement siElement = element.firstChildElement(QStringLiteral("si"));
+    m_siId = siElement.attribute(QStringLiteral("id"));
+    m_mimeType = siElement.attribute(QStringLiteral("mime-type"));
+    if (siElement.attribute(QStringLiteral("profile")) == ns_stream_initiation_file_transfer)
         m_profile = FileTransfer;
     else
         m_profile = None;
 
     QDomElement itemElement = siElement.firstChildElement();
-    while (!itemElement.isNull())
-    {
-        if (itemElement.tagName() == "feature" && itemElement.namespaceURI() == ns_feature_negotiation) {
+    while (!itemElement.isNull()) {
+        if (itemElement.tagName() == QStringLiteral("feature") && itemElement.namespaceURI() == ns_feature_negotiation) {
             m_featureForm.parse(itemElement.firstChildElement());
-        } else if (itemElement.tagName() == "file" && itemElement.namespaceURI() == ns_stream_initiation_file_transfer) {
+        } else if (itemElement.tagName() == QStringLiteral("file") && itemElement.namespaceURI() == ns_stream_initiation_file_transfer) {
             m_fileInfo.parse(itemElement);
         }
         itemElement = itemElement.nextSiblingElement();
@@ -108,17 +107,17 @@ void QXmppStreamInitiationIq::parseElementFromChild(const QDomElement &element)
 
 void QXmppStreamInitiationIq::toXmlElementFromChild(QXmlStreamWriter *writer) const
 {
-    writer->writeStartElement("si");
-    writer->writeAttribute("xmlns", ns_stream_initiation);
-    helperToXmlAddAttribute(writer, "id", m_siId);
-    helperToXmlAddAttribute(writer, "mime-type", m_mimeType);
+    writer->writeStartElement(QStringLiteral("si"));
+    writer->writeDefaultNamespace(ns_stream_initiation);
+    helperToXmlAddAttribute(writer, QStringLiteral("id"), m_siId);
+    helperToXmlAddAttribute(writer, QStringLiteral("mime-type"), m_mimeType);
     if (m_profile == FileTransfer)
-        helperToXmlAddAttribute(writer, "profile", ns_stream_initiation_file_transfer);
+        helperToXmlAddAttribute(writer, QStringLiteral("profile"), ns_stream_initiation_file_transfer);
     if (!m_fileInfo.isNull())
         m_fileInfo.toXml(writer);
     if (!m_featureForm.isNull()) {
-        writer->writeStartElement("feature");
-        writer->writeAttribute("xmlns", ns_feature_negotiation);
+        writer->writeStartElement(QStringLiteral("feature"));
+        writer->writeDefaultNamespace(ns_feature_negotiation);
         m_featureForm.toXml(writer);
         writer->writeEndElement();
     }

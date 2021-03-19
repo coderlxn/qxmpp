@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,15 +24,15 @@
 #ifndef QXMPPBOOKMARKMANAGER_H
 #define QXMPPBOOKMARKMANAGER_H
 
-#include <QUrl>
-
 #include "QXmppClientExtension.h"
+
+#include <QUrl>
 
 class QXmppBookmarkManagerPrivate;
 class QXmppBookmarkSet;
 
 /// \brief The QXmppBookmarkManager class allows you to store and retrieve
-/// bookmarks as defined by XEP-0048: Bookmarks.
+/// bookmarks as defined by \xep{0048}: Bookmarks.
 ///
 
 class QXMPP_EXPORT QXmppBookmarkManager : public QXmppClientExtension
@@ -41,31 +41,31 @@ class QXMPP_EXPORT QXmppBookmarkManager : public QXmppClientExtension
 
 public:
     QXmppBookmarkManager();
-    ~QXmppBookmarkManager();
+    ~QXmppBookmarkManager() override;
 
     bool areBookmarksReceived() const;
     QXmppBookmarkSet bookmarks() const;
     bool setBookmarks(const QXmppBookmarkSet &bookmarks);
 
     /// \cond
-    bool handleStanza(const QDomElement &stanza);
+    bool handleStanza(const QDomElement &stanza) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when bookmarks are received.
     void bookmarksReceived(const QXmppBookmarkSet &bookmarks);
 
 protected:
     /// \cond
-    void setClient(QXmppClient* client);
+    void setClient(QXmppClient *client) override;
     /// \endcond
 
-private slots:
+private Q_SLOTS:
     void slotConnected();
     void slotDisconnected();
 
 private:
-    QXmppBookmarkManagerPrivate * const d;
+    QXmppBookmarkManagerPrivate *const d;
 };
 
 #endif

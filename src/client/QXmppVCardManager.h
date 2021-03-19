@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,7 +21,6 @@
  *
  */
 
-
 #ifndef QXMPPVCARDMANAGER_H
 #define QXMPPVCARDMANAGER_H
 
@@ -30,12 +29,13 @@
 class QXmppVCardIq;
 class QXmppVCardManagerPrivate;
 
-/// \brief The QXmppVCardManager class gets/sets XMPP vCards. It is an
-/// implementation of XEP-0054: vcard-temp.
 ///
-/// \note It's object should not be created using it's constructor. Instead
-/// QXmppClient::vCardManager() should be used to get the reference of instantiated
-/// object this class.
+/// \brief The QXmppVCardManager class gets/sets XMPP vCards. It is an
+/// implementation of \xep{0054}: vcard-temp.
+///
+/// \note Its object should not be created using its constructor. Instead
+/// \c QXmppClient::findExtension<QXmppVCardManager>() should be used to get
+/// the instantiated object of this class.
 ///
 /// <B>Getting vCards of entries in Roster:</B><BR>
 /// It doesn't store vCards of the JIDs in the roster of connected user. Instead
@@ -52,14 +52,14 @@ class QXmppVCardManagerPrivate;
 /// \note Client can't set/change vCards of roster entries.
 ///
 /// \ingroup Managers
-
+///
 class QXMPP_EXPORT QXmppVCardManager : public QXmppClientExtension
 {
     Q_OBJECT
 
 public:
     QXmppVCardManager();
-    ~QXmppVCardManager();
+    ~QXmppVCardManager() override;
 
     QString requestVCard(const QString& bareJid = QString());
 
@@ -70,11 +70,11 @@ public:
     bool isClientVCardReceived() const;
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement& element) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when the requested vCard is received
     /// after calling the requestVCard() function.
     void vCardReceived(const QXmppVCardIq&);
@@ -84,7 +84,7 @@ signals:
     void clientVCardReceived();
 
 private:
-    QXmppVCardManagerPrivate *d;
+    QXmppVCardManagerPrivate* d;
 };
 
-#endif // QXMPPVCARDMANAGER_H
+#endif  // QXMPPVCARDMANAGER_H

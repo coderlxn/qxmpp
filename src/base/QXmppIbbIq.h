@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Authors:
  *  Manjeet Dahiya
@@ -27,23 +27,29 @@
 
 #include "QXmppIq.h"
 
-class QXmppIbbOpenIq: public QXmppIq
+///
+/// \brief QXmppIbbOpenIq represents an IBB open request as defined by
+/// \xep{0047}: In-Band Bytestreams.
+///
+/// \ingroup Stanzas
+///
+class QXmppIbbOpenIq : public QXmppIq
 {
 public:
     QXmppIbbOpenIq();
 
     long blockSize() const;
-    void setBlockSize( long block_size );
+    void setBlockSize(long block_size);
 
     QString sid() const;
-    void setSid( const QString &sid );
+    void setSid(const QString &sid);
 
     static bool isIbbOpenIq(const QDomElement &element);
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -51,46 +57,58 @@ private:
     QString m_sid;
 };
 
-class QXmppIbbCloseIq: public QXmppIq
+///
+/// \brief QXmppIbbCloseIq represents an IBB close request as defined by
+/// \xep{0047}: In-Band Bytestreams.
+///
+/// \ingroup Stanzas
+///
+class QXmppIbbCloseIq : public QXmppIq
 {
 public:
     QXmppIbbCloseIq();
 
     QString sid() const;
-    void setSid( const QString &sid );
+    void setSid(const QString &sid);
 
     static bool isIbbCloseIq(const QDomElement &element);
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
     QString m_sid;
 };
 
+///
+/// \brief QXmppIbbCloseIq represents an IBB data request as defined by
+/// \xep{0047}: In-Band Bytestreams.
+///
+/// \ingroup Stanzas
+///
 class QXMPP_EXPORT QXmppIbbDataIq : public QXmppIq
 {
 public:
     QXmppIbbDataIq();
 
     quint16 sequence() const;
-    void setSequence( quint16 seq );
+    void setSequence(quint16 seq);
 
     QString sid() const;
-    void setSid( const QString &sid );
+    void setSid(const QString &sid);
 
     QByteArray payload() const;
-    void setPayload( const QByteArray &data );
+    void setPayload(const QByteArray &data);
 
     static bool isIbbDataIq(const QDomElement &element);
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:
@@ -99,4 +117,4 @@ private:
     QByteArray m_payload;
 };
 
-#endif // QXMPPIBBIQS_H
+#endif  // QXMPPIBBIQS_H

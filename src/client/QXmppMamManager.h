@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Niels Ole Salscheider
@@ -24,15 +24,16 @@
 #ifndef QXMPPMAMMANAGER_H
 #define QXMPPMAMMANAGER_H
 
-#include <QDateTime>
-
 #include "QXmppClientExtension.h"
 #include "QXmppResultSet.h"
 
+#include <QDateTime>
+
 class QXmppMessage;
 
+///
 /// \brief The QXmppMamManager class makes it possible to access message
-/// archives as defined by XEP-0313: Message Archive Management.
+/// archives as defined by \xep{0313}: Message Archive Management.
 ///
 /// To make use of this manager, you need to instantiate it and load it into
 /// the QXmppClient instance as follows:
@@ -43,7 +44,9 @@ class QXmppMessage;
 /// \endcode
 ///
 /// \ingroup Managers
-
+///
+/// \since QXmpp 1.0
+///
 class QXMPP_EXPORT QXmppMamManager : public QXmppClientExtension
 {
     Q_OBJECT
@@ -57,11 +60,11 @@ public:
                                      const QXmppResultSetQuery &resultSetQuery = QXmppResultSetQuery());
 
     /// \cond
-    QStringList discoveryFeatures() const;
-    bool handleStanza(const QDomElement &element);
+    QStringList discoveryFeatures() const override;
+    bool handleStanza(const QDomElement &element) override;
     /// \endcond
 
-signals:
+Q_SIGNALS:
     /// This signal is emitted when an archived message is received
     void archivedMessageReceived(const QString &queryId,
                                  const QXmppMessage &message);

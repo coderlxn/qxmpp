@@ -7,6 +7,9 @@ Manjeet Dahiya <manjeetdahiya@gmail.com>
 Jeremy Lainé <jeremy.laine@m4x.org>
  * Co-author of QXmpp.
 
+Linus Jahn <lnj@kaidan.im>
+ * Current lead developer of QXmpp.
+
 Ian Reinhart Geiser <geiseri@kde.org>
  * Initial author of Jabber-RPC support.
 
@@ -16,3 +19,5 @@ Georg Rudoy <0xd34df00d@gmail.com>
 Niels Ole Salscheider <niels_ole@salscheider-online.de>
  * Build system, cleanups.
 
+Oliver Goffart <ogoffart@woboq.com>
+ * Author of QXmppResultSet.

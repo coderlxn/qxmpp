@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -20,7 +20,6 @@
  * Lesser General Public License for more details.
  *
  */
-
 
 #ifndef QXMPPIQ_H
 #define QXMPPIQ_H
@@ -43,8 +42,7 @@ class QXMPP_EXPORT QXmppIq : public QXmppStanza
 {
 public:
     /// This enum describes the type of IQ.
-    enum Type
-    {
+    enum Type {
         Error = 0,  ///< Error response.
         Get,        ///< Get request.
         Set,        ///< Set request.
@@ -53,18 +51,18 @@ public:
 
     QXmppIq(QXmppIq::Type type = QXmppIq::Get);
     QXmppIq(const QXmppIq &other);
-    ~QXmppIq();
+    ~QXmppIq() override;
 
-    QXmppIq& operator=(const QXmppIq &other);
+    QXmppIq &operator=(const QXmppIq &other);
 
     QXmppIq::Type type() const;
     void setType(QXmppIq::Type);
 
-    bool isXmppStanza() const;
+    bool isXmppStanza() const override;
 
     /// \cond
-    void parse(const QDomElement &element);
-    void toXml(QXmlStreamWriter *writer) const;
+    void parse(const QDomElement &element) override;
+    void toXml(QXmlStreamWriter *writer) const override;
 
 protected:
     virtual void parseElementFromChild(const QDomElement &element);
@@ -75,4 +73,4 @@ private:
     QSharedDataPointer<QXmppIqPrivate> d;
 };
 
-#endif // QXMPPIQ_H
+#endif  // QXMPPIQ_H

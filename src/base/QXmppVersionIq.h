@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -27,7 +27,7 @@
 #include "QXmppIq.h"
 
 /// \brief The QXmppVersionIq class represents an IQ for conveying a software
-/// version as defined by XEP-0092: Software Version.
+/// version as defined by \xep{0092}: Software Version.
 ///
 /// \ingroup Stanzas
 
@@ -49,8 +49,8 @@ public:
 
 protected:
     /// \cond
-    void parseElementFromChild(const QDomElement &element);
-    void toXmlElementFromChild(QXmlStreamWriter *writer) const;
+    void parseElementFromChild(const QDomElement &element) override;
+    void toXmlElementFromChild(QXmlStreamWriter *writer) const override;
     /// \endcond
 
 private:

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -24,10 +24,10 @@
 #ifndef QXMPPSTUN_H
 #define QXMPPSTUN_H
 
-#include <QObject>
-
-#include "QXmppLogger.h"
 #include "QXmppJingleIq.h"
+#include "QXmppLogger.h"
+
+#include <QObject>
 
 class CandidatePair;
 class QDataStream;
@@ -46,21 +46,21 @@ class QXMPP_EXPORT QXmppStunMessage
 {
 public:
     enum MethodType {
-        Binding      = 0x1,
+        Binding = 0x1,
         SharedSecret = 0x2,
-        Allocate     = 0x3,
-        Refresh      = 0x4,
-        Send         = 0x6,
-        Data         = 0x7,
+        Allocate = 0x3,
+        Refresh = 0x4,
+        Send = 0x6,
+        Data = 0x7,
         CreatePermission = 0x8,
-        ChannelBind  = 0x9
+        ChannelBind = 0x9
     };
 
     enum ClassType {
-        Request    = 0x000,
+        Request = 0x000,
         Indication = 0x010,
-        Response   = 0x100,
-        Error      = 0x110
+        Response = 0x100,
+        Error = 0x110
     };
 
     QXmppStunMessage();
@@ -113,7 +113,7 @@ public:
     void setUsername(const QString &username);
 
     QByteArray encode(const QByteArray &key = QByteArray(), bool addFingerprint = true) const;
-    bool decode(const QByteArray &buffer, const QByteArray &key = QByteArray(), QStringList *errors = 0);
+    bool decode(const QByteArray &buffer, const QByteArray &key = QByteArray(), QStringList *errors = nullptr);
     QString toString() const;
     static quint16 peekType(const QByteArray &buffer, quint32 &cookie, QByteArray &id);
 
@@ -167,21 +167,21 @@ class QXMPP_EXPORT QXmppIceComponent : public QXmppLoggable
     Q_OBJECT
 
 public:
-    ~QXmppIceComponent();
+    ~QXmppIceComponent() override;
 
     int component() const;
     bool isConnected() const;
     QList<QXmppJingleCandidate> localCandidates() const;
 
     static QList<QHostAddress> discoverAddresses();
-    static QList<QUdpSocket*> reservePorts(const QList<QHostAddress> &addresses, int count, QObject *parent = 0);
+    static QList<QUdpSocket *> reservePorts(const QList<QHostAddress> &addresses, int count, QObject *parent = nullptr);
 
-public slots:
+public Q_SLOTS:
     void close();
     void connectToHost();
     qint64 sendDatagram(const QByteArray &datagram);
 
-private slots:
+private Q_SLOTS:
     void checkCandidates();
     void handleDatagram(const QByteArray &datagram, const QHostAddress &host, quint16 port);
     void turnConnected();
@@ -189,7 +189,7 @@ private slots:
     void updateGatheringState();
     void writeStun(const QXmppStunMessage &request);
 
-signals:
+Q_SIGNALS:
     /// \brief This signal is emitted once ICE negotiation succeeds.
     void connected();
 
@@ -203,7 +203,7 @@ signals:
     void localCandidatesChanged();
 
 private:
-    QXmppIceComponent(int component, QXmppIcePrivate *config, QObject *parent=0);
+    QXmppIceComponent(int component, QXmppIcePrivate *config, QObject *parent = nullptr);
 
     QXmppIceComponentPrivate *d;
     friend class QXmppIceComponentPrivate;
@@ -241,19 +241,29 @@ private:
 class QXMPP_EXPORT QXmppIceConnection : public QXmppLoggable
 {
     Q_OBJECT
-    Q_ENUMS(GatheringState)
+
+    ///
+    /// The ICE gathering state, that is the discovery of local candidates
+    ///
+    /// \since QXmpp 0.9.3
+    ///
     Q_PROPERTY(QXmppIceConnection::GatheringState gatheringState READ gatheringState NOTIFY gatheringStateChanged)
 
 public:
-    enum GatheringState
-    {
+    ///
+    /// This enum describes the gathering state of the ICE connection.
+    ///
+    /// \since QXmpp 0.9.3
+    ///
+    enum GatheringState {
         NewGatheringState,
         BusyGatheringState,
         CompleteGatheringState
     };
+    Q_ENUM(GatheringState)
 
-    QXmppIceConnection(QObject *parent = 0);
-    ~QXmppIceConnection();
+    QXmppIceConnection(QObject *parent = nullptr);
+    ~QXmppIceConnection() override;
 
     QXmppIceComponent *component(int component);
     void addComponent(int component);
@@ -267,6 +277,7 @@ public:
     void setRemoteUser(const QString &user);
     void setRemotePassword(const QString &password);
 
+    void setStunServers(const QList<QPair<QHostAddress, quint16>> &servers);
     void setStunServer(const QHostAddress &host, quint16 port = 3478);
     void setTurnServer(const QHostAddress &host, quint16 port = 3478);
     void setTurnUser(const QString &user);
@@ -275,26 +286,37 @@ public:
     bool bind(const QList<QHostAddress> &addresses);
     bool isConnected() const;
 
+    // documentation needs to be here, see https://stackoverflow.com/questions/49192523/
+    ///
+    /// Returns the ICE gathering state, that is the discovery of local
+    /// candidates.
+    ///
+    /// \since QXmpp 0.9.3
+    ///
     GatheringState gatheringState() const;
 
-signals:
+Q_SIGNALS:
     /// \brief This signal is emitted once ICE negotiation succeeds.
     void connected();
 
     /// \brief This signal is emitted when ICE negotiation fails.
     void disconnected();
 
+    ///
     /// \brief This signal is emitted when the gathering state of local candidates changes.
+    ///
+    /// \since QXmpp 0.9.3
+    ///
     void gatheringStateChanged();
 
     /// \brief This signal is emitted when the list of local candidates changes.
     void localCandidatesChanged();
 
-public slots:
+public Q_SLOTS:
     void close();
     void connectToHost();
 
-private slots:
+private Q_SLOTS:
     void slotConnected();
     void slotGatheringStateChanged();
     void slotTimeout();

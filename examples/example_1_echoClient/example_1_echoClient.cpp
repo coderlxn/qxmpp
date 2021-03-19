@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Manjeet Dahiya
@@ -21,29 +21,24 @@
  *
  */
 
-
-#include <QCoreApplication>
+#include "example_1_echoClient.h"
 
 #include "QXmppLogger.h"
 #include "QXmppMessage.h"
 
-#include "example_1_echoClient.h"
+#include <QCoreApplication>
 
 echoClient::echoClient(QObject *parent)
     : QXmppClient(parent)
 {
-    bool check = connect(this, SIGNAL(messageReceived(QXmppMessage)),
-        SLOT(messageReceived(QXmppMessage)));
-    Q_ASSERT(check);
-    Q_UNUSED(check);
+    connect(this, &QXmppClient::messageReceived, this, &echoClient::messageReceived);
 }
 
 echoClient::~echoClient()
 {
-
 }
 
-void echoClient::messageReceived(const QXmppMessage& message)
+void echoClient::messageReceived(const QXmppMessage &message)
 {
     QString from = message.from();
     QString msg = message.body();

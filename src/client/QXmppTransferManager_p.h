@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Jeremy Lainé
@@ -51,7 +51,7 @@ public:
     void connectToHosts(const QXmppByteStreamIq &iq);
     bool writeData(const QByteArray &data);
 
-private slots:
+private Q_SLOTS:
     void _q_candidateDisconnected();
     void _q_candidateReady();
     void _q_disconnected();
@@ -77,8 +77,10 @@ public:
     void connectToProxy();
     void startSending();
 
-private slots:
+public Q_SLOTS:
     void _q_disconnected();
+
+private Q_SLOTS:
     void _q_proxyReady();
     void _q_sendData();
 };

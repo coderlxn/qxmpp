@@ -3,20 +3,22 @@ set -e
 
 if [ "$(uname -s)" = "Darwin" ]; then
     brew update
-    brew install qt
+    brew unlink python@3
+    brew install python@3 || true
+    brew link --overwrite python@3
 
     case "$CONFIG" in
     full*)
-        brew install doxygen opus speex theora libvpx
+        brew install doxygen gstreamer gst-plugins-base gst-plugins-good gst-plugins-ugly
         ;;
     esac
 else
     sudo apt-get update -qq
-    sudo apt-get install -qq clang cmake qtbase5-dev
+    sudo apt-get install -qq clang cmake
 
     case "$CONFIG" in
     full*)
-        sudo apt-get install -qq  doxygen libopus-dev libspeex-dev libtheora-dev libvpx-dev
+        sudo apt-get install -qq  doxygen graphviz libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly
         ;;
     esac
 fi

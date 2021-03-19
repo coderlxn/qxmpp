@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Jeremy Lainé
@@ -21,13 +21,13 @@
  *
  */
 
-#include <QCoreApplication>
-#include <QDateTime>
+#include "example_7_archiveHandling.h"
 
 #include "QXmppArchiveIq.h"
 #include "QXmppArchiveManager.h"
 
-#include "example_7_archiveHandling.h"
+#include <QCoreApplication>
+#include <QDateTime>
 
 static void logStart(const QString &msg)
 {
@@ -40,30 +40,22 @@ static void logEnd(const QString &msg)
 }
 
 xmppClient::xmppClient(QObject *parent)
-    : QXmppClient(parent)
-    , m_collectionCount(-1)
-    , m_pageDirection(PageForwards)
-    , m_pageSize(10)
+    : QXmppClient(parent), m_collectionCount(-1), m_pageDirection(PageForwards), m_pageSize(10)
 {
-    bool check;
-    Q_UNUSED(check);
 
     // add archive manager
     archiveManager = new QXmppArchiveManager;
     addExtension(archiveManager);
 
     // connect signals
-    check = connect(this, SIGNAL(connected()),
-                    this, SLOT(clientConnected()));
-    Q_ASSERT(check);
+    connect(this, &QXmppClient::connected,
+            this, &xmppClient::clientConnected);
 
-    check = connect(archiveManager, SIGNAL(archiveChatReceived(QXmppArchiveChat, QXmppResultSetReply)),
-                    SLOT(archiveChatReceived(QXmppArchiveChat, QXmppResultSetReply)));
-    Q_ASSERT(check);
+    connect(archiveManager, &QXmppArchiveManager::archiveChatReceived,
+            this, &xmppClient::archiveChatReceived);
 
-    check = connect(archiveManager, SIGNAL(archiveListReceived(QList<QXmppArchiveChat>, QXmppResultSetReply)),
-                    SLOT(archiveListReceived(QList<QXmppArchiveChat>, QXmppResultSetReply)));
-    Q_ASSERT(check);
+    connect(archiveManager, &QXmppArchiveManager::archiveListReceived,
+            this, &xmppClient::archiveListReceived);
 
     // set limits
     m_startDate = QDateTime::currentDateTime().addDays(-21);
@@ -72,7 +64,6 @@ xmppClient::xmppClient(QObject *parent)
 
 xmppClient::~xmppClient()
 {
-
 }
 
 void xmppClient::setPageDirection(PageDirection direction)
@@ -113,7 +104,7 @@ void xmppClient::archiveListReceived(const QList<QXmppArchiveChat> &chats, const
         logEnd("no items");
     } else {
         logEnd(QString("items %1 to %2 of %3").arg(QString::number(rsmReply.index()), QString::number(rsmReply.index() + chats.size() - 1), QString::number(rsmReply.count())));
-        foreach (const QXmppArchiveChat &chat, chats) {
+        for (const auto &chat : chats) {
             qDebug("chat start %s", qPrintable(chat.start().toString()));
             // NOTE: to actually retrieve conversations, uncomment this
             //archiveManager->retrieveCollection(chat.with(), chat.start());
@@ -136,8 +127,11 @@ void xmppClient::archiveListReceived(const QList<QXmppArchiveChat> &chats, const
 
 void xmppClient::archiveChatReceived(const QXmppArchiveChat &chat, const QXmppResultSetReply &rsmReply)
 {
-    logEnd(QString("chat received, RSM count %1").arg(QString::number(rsmReply.count())));
-    foreach (const QXmppArchiveMessage &msg, chat.messages()) {
+    logEnd(QString("chat received, RSM count %1")
+               .arg(QString::number(rsmReply.count())));
+
+    const auto messages = chat.messages();
+    for (const auto &msg : messages) {
         qDebug("example_7_archiveHandling : %s", qPrintable(msg.body()));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *  Manjeet Dahiya
@@ -21,7 +21,6 @@
  *
  */
 
-
 #include "QXmppConstants_p.h"
 
 const char* ns_stream = "http://etherx.jabber.org/streams";
@@ -33,10 +32,14 @@ const char* ns_sasl = "urn:ietf:params:xml:ns:xmpp-sasl";
 const char* ns_bind = "urn:ietf:params:xml:ns:xmpp-bind";
 const char* ns_session = "urn:ietf:params:xml:ns:xmpp-session";
 const char* ns_stanza = "urn:ietf:params:xml:ns:xmpp-stanzas";
+const char* ns_pre_approval = "urn:xmpp:features:pre-approval";
+const char* ns_rosterver = "urn:xmpp:features:rosterver";
 // XEP-0009: Jabber-RPC
 const char* ns_rpc = "jabber:iq:rpc";
 // XEP-0020: Feature Negotiation
 const char* ns_feature_negotiation = "http://jabber.org/protocol/feature-neg";
+// XEP-0027: Current Jabber OpenPGP Usage
+const char* ns_legacy_openpgp = "jabber:x:encrypted";
 // XEP-0030: Service Discovery
 const char* ns_disco_info = "http://jabber.org/protocol/disco#info";
 const char* ns_disco_items = "http://jabber.org/protocol/disco#items";
@@ -55,12 +58,18 @@ const char* ns_private = "jabber:iq:private";
 const char* ns_vcard = "vcard-temp";
 // XEP-0059: Result Set Management
 const char* ns_rsm = "http://jabber.org/protocol/rsm";
+// XEP-0060: Publish-Subscribe
+const char* ns_pubsub = "http://jabber.org/protocol/pubsub";
 // XEP-0065: SOCKS5 Bytestreams
 const char* ns_bytestreams = "http://jabber.org/protocol/bytestreams";
+// XEP-0066: Out of Band Data
+const char* ns_oob = "jabber:x:oob";
 // XEP-0071: XHTML-IM
-const char *ns_xhtml_im = "http://jabber.org/protocol/xhtml-im";
+const char* ns_xhtml = "http://www.w3.org/1999/xhtml";
+const char* ns_xhtml_im = "http://jabber.org/protocol/xhtml-im";
 // XEP-0077: In-Band Registration
 const char* ns_register = "jabber:iq:register";
+const char* ns_register_feature = "http://jabber.org/features/iq-register";
 // XEP-0078: Non-SASL Authentication
 const char* ns_auth = "jabber:iq:auth";
 const char* ns_authFeature = "http://jabber.org/features/iq-auth";
@@ -120,7 +129,50 @@ const char* ns_conference = "jabber:x:conference";
 const char* ns_carbons = "urn:xmpp:carbons:2";
 // XEP-0297: Stanza Forwarding
 const char* ns_forwarding = "urn:xmpp:forward:0";
+// XEP-0308: Last Message Correction
+const char* ns_message_correct = "urn:xmpp:message-correct:0";
 // XEP-0313: Message Archive Management
-const char* ns_mam = "urn:xmpp:mam:1";
+const char* ns_mam = "urn:xmpp:mam:2";
+// XEP-0319: Last User Interaction in Presence
+const char* ns_idle = "urn:xmpp:idle:1";
 // XEP-0333: Chat Markers
 const char* ns_chat_markers = "urn:xmpp:chat-markers:0";
+// XEP-0334: Message Processing Hints
+const char* ns_message_processing_hints = "urn:xmpp:hints";
+// XEP-0352: Client State Indication
+const char* ns_csi = "urn:xmpp:csi:0";
+// XEP-0357: Push Notifications
+const char* ns_push = "urn:xmpp:push:0";
+// XEP-0359: Unique and Stable Stanza IDs
+const char* ns_sid = "urn:xmpp:sid:0";
+// XEP-0363: HTTP File Upload
+const char* ns_http_upload = "urn:xmpp:http:upload:0";
+// XEP-0364: Current Off-the-Record Messaging Usage
+const char* ns_otr = "urn:xmpp:otr:0";
+// XEP-0367: Message Attaching
+const char* ns_message_attaching = "urn:xmpp:message-attaching:1";
+// XEP-0369: Mediated Information eXchange (MIX)
+const char* ns_mix = "urn:xmpp:mix:core:1";
+const char* ns_mix_create_channel = "urn:xmpp:mix:core:1#create-channel";
+const char* ns_mix_searchable = "urn:xmpp:mix:core:1#searchable";
+const char* ns_mix_node_messages = "urn:xmpp:mix:nodes:messages";
+const char* ns_mix_node_participants = "urn:xmpp:mix:nodes:participants";
+const char* ns_mix_node_presence = "urn:xmpp:mix:nodes:presence";
+const char* ns_mix_node_config = "urn:xmpp:mix:nodes:config";
+const char* ns_mix_node_info = "urn:xmpp:mix:nodes:info";
+// XEP-0373: OpenPGP for XMPP
+const char* ns_ox = "urn:xmpp:openpgp:0";
+// XEP-0380: Explicit Message Encryption
+const char* ns_eme = "urn:xmpp:eme:0";
+// XEP-0382: Spoiler messages
+const char* ns_spoiler = "urn:xmpp:spoiler:0";
+// XEP-0384: OMEMO Encryption
+const char* ns_omemo = "eu.siacs.conversations.axolotl";
+// XEP-0405: Mediated Information eXchange (MIX): Participant Server Requirements
+const char* ns_mix_pam = "urn:xmpp:mix:pam:1";
+const char* ns_mix_roster = "urn:xmpp:mix:roster:0";
+const char* ns_mix_presence = "urn:xmpp:presence:0";
+// XEP-0407: Mediated Information eXchange (MIX): Miscellaneous Capabilities
+const char* ns_mix_misc = "urn:xmpp:mix:misc:0";
+// XEP-0428: Fallback Indication
+const char* ns_fallback_indication = "urn:xmpp:fallback:0";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2014 The QXmpp developers
+ * Copyright (C) 2008-2021 The QXmpp developers
  *
  * Author:
  *	Jeremy Lainé
@@ -21,15 +21,14 @@
  *
  */
 
-
 #ifndef XMPPCLIENT_H
 #define XMPPCLIENT_H
 
-#include <QDateTime>
-
+#include "QXmppArchiveIq.h"
 #include "QXmppClient.h"
 
-class QXmppArchiveChat;
+#include <QDateTime>
+
 class QXmppArchiveManager;
 class QXmppResultSetReply;
 
@@ -43,8 +42,8 @@ public:
         PageBackwards
     };
 
-    xmppClient(QObject *parent = 0);
-    ~xmppClient();
+    xmppClient(QObject *parent = nullptr);
+    ~xmppClient() override;
 
     void setPageDirection(PageDirection direction);
     void setPageSize(int size);
@@ -63,4 +62,4 @@ private:
     int m_pageSize;
 };
 
-#endif // XMPPCLIENT_H
+#endif  // XMPPCLIENT_H
