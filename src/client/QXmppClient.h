@@ -194,6 +194,8 @@ public:
     bool isActive() const;
     void setActive(bool active);
 
+    void ping();
+
     StreamManagementState streamManagementState() const;
 
     QXmppPresence clientPresence() const;
@@ -288,6 +290,8 @@ Q_SIGNALS:
 
     /// This signal is emitted when the client state changes.
     void stateChanged(QXmppClient::State state);
+
+    void stanzaReceived();
 
 public Q_SLOTS:
     void connectToServer(const QXmppConfiguration &,

@@ -94,16 +94,16 @@ protected:
 public Q_SLOTS:
     void disconnectFromHost() override;
 
+    void pingStart();
+    void pingStop();
+    void pingSend();
+    void pingTimeout();
+
 private Q_SLOTS:
     void _q_dnsLookupFinished();
     void _q_socketDisconnected();
     void socketError(QAbstractSocket::SocketError);
     void socketSslErrors(const QList<QSslError> &);
-
-    void pingStart();
-    void pingStop();
-    void pingSend();
-    void pingTimeout();
 
 private:
     bool setResumeAddress(const QString &address);

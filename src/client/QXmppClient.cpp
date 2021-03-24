@@ -121,6 +121,9 @@ QXmppClient::QXmppClient(QObject* parent)
     d->addProperCapability(d->clientPresence);
 
     connect(d->stream, &QXmppOutgoingClient::elementReceived,
+                        this, &QXmppClient::stanzaReceived);
+
+    connect(d->stream, &QXmppOutgoingClient::elementReceived,
             this, &QXmppClient::_q_elementReceived);
 
     connect(d->stream, &QXmppOutgoingClient::messageReceived,
@@ -354,6 +357,12 @@ void QXmppClient::setActive(bool active)
         QString packet = "<%1 xmlns='%2'/>";
         d->stream->sendData(packet.arg(active ? "active" : "inactive", ns_csi).toUtf8());
     }
+}
+
+
+void QXmppClient::ping()
+{
+    d->stream->pingSend();
 }
 
 ///
